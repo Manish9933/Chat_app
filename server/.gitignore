@@ -1,0 +1,19 @@
+# Node.js
+node_modules/
+npm-debug.log
+.env
+*.log
+dist/
+build/
+tmp/
+coverage/
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Sensitive files (if applicable)
+config/secrets.js
+*.key
