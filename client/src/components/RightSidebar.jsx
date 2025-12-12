@@ -1,54 +1,56 @@
-import React, { useContext, useEffect, useState} from 'react'
-import assets, { imagesDummyData } from '../assets/assets'
-import { ChatContext } from '../../context/ChatContext'
-import { AuthContext } from '../../context/AuthContext'
+import React, { useContext, useEffect, useState } from "react";
+import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../context/AuthContext";
+import assets from "../assets/assets";
 
 const RightSidebar = () => {
+  const { selectedUser, messages } = useContext(ChatContext);
+  const { onlineUsers } = useContext(AuthContext);
 
-  const {selectedUser, messages} = useContext(ChatContext)
-  const {logout, onlineUsers} = useContext(AuthContext)
-  const [msgImages, setMsgImages] = useState([])
+  const [media, setMedia] = useState([]);
 
-  // Get all the images from the messages and set them to state
-  useEffect(()=>{
-      setMsgImages(
-          messages.filter(msg => msg.image).map(msg=>msg.image)
-      )
-  },[messages])
+  useEffect(() => {
+    setMedia(messages.filter((m) => m.image).map((m) => m.image));
+  }, [messages]);
 
-  return selectedUser &&  (
-   <div className={`bg-[#8185B2]/10 text-white w-full relative overflow-y-scroll 
-    ${!selectedUser ? "max-md:hidden":""}`}>
+  if (!selectedUser) return null;
 
-      <div className='pt-16 flex flex-col items-center gap-2 text-xs font-light mx-auto '>
-        <img src={selectedUser?.profilePic || assets.avatar_icon} alt="" 
-        className='w-20 aspect-[1/1] rounded-full'></img>
-        <h1 className='px-10 text-xl font-medium mx-auto flex items-center gap-2'>
-          {onlineUsers.includes(selectedUser._id)} && <p className='w-2 h-2 rounded-full bg-green-500'></p>
+  return (
+    <div className="bg-[#8185B2]/10 text-white p-5 rounded-l-xl overflow-y-scroll max-md:hidden">
+      <div className="text-center mt-8">
+        <img
+          src={selectedUser.profilePic || assets.avatar_icon}
+          className="w-20 h-20 rounded-full mx-auto"
+        />
+
+        <h2 className="text-xl mt-2 flex justify-center items-center gap-2">
           {selectedUser.fullName}
-          </h1>
-          <p className='px-10 mx-auto'> {selectedUser.bio}</p>
-      
-           </div>
-      <hr className='border-[#ffffff50] my-4'></hr>
-      <p>Media</p>
-      <div className='mt-2 max-h-[200px] overflow-y-scroll grid grid-cols-2 gap-4 opacity-80'>
-        {msgImages.map((url,index)=>(
-          <div key={index} onClick={()=>window.open(url)} className='cursor-pointer rounded'>
-            <img src={url} className='h-full rounded-md'></img>
-              
-          </div>
-          
-          
-        ))}
-        
-      </div>
-      
-      <button onClick={()=> logout()} className='absolute bottom-5 left-1/2 transform -translate-x-1/2
-      bg-gradient-to-r from-purple-400 to-violet-600 text-white border-none text-sm
-      font-light py-2 px-20 rounded-full cursor-pointer'>logout</button>
-    </div>
-  )
-}
 
-export default RightSidebar
+          {onlineUsers.includes(selectedUser._id) ? (
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+          ) : (
+            <span className="text-xs text-gray-400">Last seen recently</span>
+          )}
+        </h2>
+
+        <p className="opacity-70 mt-1">{selectedUser.bio || "No bio provided"}</p>
+      </div>
+
+      <hr className="border-gray-600 my-4" />
+
+      <p className="font-medium">Media</p>
+      <div className="grid grid-cols-2 gap-3 mt-3 max-h-[220px] overflow-y-scroll">
+        {media.map((m, i) => (
+          <img
+            key={i}
+            src={m}
+            className="rounded cursor-pointer"
+            onClick={() => window.open(m)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default RightSidebar;

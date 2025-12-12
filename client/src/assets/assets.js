@@ -22,6 +22,10 @@ import pic4 from './pic4.png'
 import img1 from './img1.jpg'
 import img2 from './img2.jpg'
 import login from './login.png'
+import call_icon from './call_icon.png';
+import video_icon from './video_icon.png';
+
+
 
 const assets = {
     avatar_icon,
@@ -37,7 +41,9 @@ const assets = {
     code,
     bgImage,
     login,
-    kartik
+    kartik,
+    call_icon,
+    video_icon,
 }
 
 export default assets;

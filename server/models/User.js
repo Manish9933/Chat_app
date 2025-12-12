@@ -2,17 +2,15 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    email: {type: String, required: true, unique: true},
-    fullName: {type: String, required: true },
-    password: {type: String, required: true, minlength: 6},
-    profilePic: {type: String, default: ""},
-    bio: {type: String},
+    email: { type: String, required: true, unique: true },
+    fullName: { type: String, required: true },
+    password: { type: String, required: true },
+    profilePic: { type: String, default: "" },
+    bio: { type: String, default: "" },
+
+    lastSeen: { type: Date, default: Date.now }, // NEW
   },
   { timestamps: true }
 );
 
-// Capital U is important!
-const User = mongoose.model("User", userSchema);
-
-// Export the SAME variable name
-export default User;
+export default mongoose.model("User", userSchema);

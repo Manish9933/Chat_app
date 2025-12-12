@@ -6,28 +6,36 @@ import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 
 import { Toaster } from "react-hot-toast";
-// import { AuthContext } from "../context/AuthContext.jsx";
 import { AuthContext } from "../context/AuthContext.jsx";
 
+import CallUI from "./components/call/CallUI"; 
+import CallPopup from "./components/call/CallPopup"// ✅ FIXED IMPORT
 
 const App = () => {
   const { authUser } = useContext(AuthContext);
 
   return (
-    <div className="bg-[url('./src/assets/bgImage.svg')] bg-contain">
+    <div className="bg-[url('./src/assets/bgImage.svg')] bg-cover min-h-screen">
       <Toaster />
+
+      <CallUI /> 
+      <CallPopup />
+
       <Routes>
         <Route
           path="/"
-          element={authUser ? <HomePage /> : <Navigate to="/login" />}/>
-        
+          element={authUser ? <HomePage /> : <Navigate to="/login" />}
+        />
+
         <Route
           path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+        />
 
         <Route
           path="/profile"
-          element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+          element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+        />
       </Routes>
     </div>
   );

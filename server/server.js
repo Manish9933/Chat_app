@@ -2,72 +2,73 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import http from "http";
-
 import { connectDb } from "./lib/db.js";
-
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
-
 import { Server } from "socket.io";
-
 
 const app = express();
 const server = http.createServer(app);
 
-// Middlewares
-app.use(express.json({ limit: "4mb" }));
+// MIDDLEWARE
+app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
-// intialize socket.io
+// SOCKET INIT
 export const io = new Server(server, {
-  cors: {origin: "*"}
-})
-// store online users
-export const userSocketMap = {}; //{ userId: socketId}
+  cors: { origin: "*" }
+});
 
-// socket.io socket connections handler
+// STORE USER SOCKETS
+export const userSocketMap = {};
+
+// 🔥 SOCKET EVENTS
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
-  console.log("User Connected:", userId);
+  console.log("User connected:", userId);
 
-  if(userId) { userSocketMap[userId] = socket.id;
-  
-
-
-
-  // emit online user to all connected clients
-  io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-  socket.on("disconnect", ()=>{
-      console.log("User Disconnected", userId);
-      delete userSocketMap[userId];
-      io.emit("getOnlineUsers", Object.keys(userSocketMap))
-    })
+  if (userId) {
+    userSocketMap[userId] = socket.id;
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
   }
-})
 
-// socket.io socket connections handler
+  // -------- CALL EVENTS --------
+  socket.on("call-user", (data) => {
+    const socketId = userSocketMap[data.to];
+    if (socketId) io.to(socketId).emit("incoming-call", data);
+  });
 
+  socket.on("answer-call", (data) => {
+    const socketId = userSocketMap[data.to];
+    if (socketId) io.to(socketId).emit("call-answered", data);
+  });
 
+  socket.on("end-call", (data) => {
+    const socketId = userSocketMap[data.to];
+    if (socketId) io.to(socketId).emit("call-ended");
+  });
 
+  socket.on("webrtc-candidate", (data) => {
+    const socketId = userSocketMap[data.to];
+    if (socketId) io.to(socketId).emit("webrtc-candidate", data);
+  });
 
+  // -------- DISCONNECT --------
+  socket.on("disconnect", () => {
+    delete userSocketMap[userId];
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    console.log("User disconnected:", userId);
+  });
+});
 
-// Routes
-app.use("/api/staus",(req, res)=> res.send("server is live"))
+// ROUTES
 app.use("/api/auth", userRouter);
-
 app.use("/api/messages", messageRouter);
+app.get("/api/status", (req, res) => res.send("Server online ✔️"));
 
-// Connect database
+// CONNECT DB
 await connectDb();
 
-
-
-
-
-
-// Start server
+// START SERVER
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () =>
-  console.log("Server running on port " + PORT)
-);
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
