@@ -7,27 +7,31 @@ import { CallContext } from "../../context/CallContext";
 import toast from "react-hot-toast";
 
 const ChatContainer = () => {
-  const { inCall, incomingCall } = useContext(CallContext);
-
   const { messages, selectedUser, setSelectedUser, sendMessage, getMessages } =
     useContext(ChatContext);
 
   const { authUser, onlineUsers } = useContext(AuthContext);
   const { startAudioCall, startVideoCall } = useContext(CallContext);
 
-  const scrollRef = useRef();
+  const scrollRef = useRef(null);
   const [input, setInput] = useState("");
 
-  const handleSend = async (e) => {
+  // ---------------- SEND TEXT ----------------
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
+
     await sendMessage({ text: input.trim() });
     setInput("");
   };
 
-  const handleImage = async (e) => {
+  // ---------------- SEND IMAGE ----------------
+  const handleSendImage = async (e) => {
     const file = e.target.files[0];
-    if (!file) return toast.error("Choose image");
+    if (!file || !file.type.startsWith("image/")) {
+      toast.error("Select a valid image");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = async () => {
@@ -37,10 +41,14 @@ const ChatContainer = () => {
     reader.readAsDataURL(file);
   };
 
+  // ---------------- LOAD MESSAGES ----------------
   useEffect(() => {
-    selectedUser && getMessages(selectedUser._id);
+    if (selectedUser) {
+      getMessages(selectedUser._id);
+    }
   }, [selectedUser]);
 
+  // ---------------- AUTO SCROLL ----------------
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -56,7 +64,7 @@ const ChatContainer = () => {
 
   return (
     <div className="h-full overflow-scroll relative backdrop-blur-lg">
-      {/* ------- HEADER ------- */}
+      {/* HEADER */}
       <div className="flex items-center gap-3 py-3 mx-4 border-b border-stone-500">
         <img
           src={selectedUser.profilePic || assets.avatar_icon}
@@ -70,7 +78,6 @@ const ChatContainer = () => {
           )}
         </p>
 
-        {/* CALL BUTTONS */}
         <img
           src={assets.call_icon}
           onClick={() => startAudioCall(selectedUser)}
@@ -90,24 +97,28 @@ const ChatContainer = () => {
         />
       </div>
 
-      {/* ------- MESSAGES ------- */}
+      {/* MESSAGES */}
       <div className="flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-10">
-        {messages.map((msg, i) => {
-          const isMe = msg.senderId === authUser._id;
+        {messages.map((msg) => {
+          const isMe =
+            msg.senderId === authUser._id ||
+            msg.senderId?._id === authUser._id;
 
           return (
             <div
-              key={i}
-              className={`flex items-end gap-2 ${!isMe && "flex-row-reverse"}`}
+              key={msg._id}
+              className={`flex items-end gap-2 ${
+                !isMe && "flex-row-reverse"
+              }`}
             >
               {msg.image ? (
                 <img
                   src={msg.image}
-                  className="max-w-[230px] rounded-lg mb-7 border border-gray-500"
+                  className="max-w-[230px] rounded-lg mb-8 border border-gray-700"
                 />
               ) : (
                 <p
-                  className={`p-2 max-w-[260px] md:text-sm rounded-lg mb-7 bg-violet-500/30 text-white ${
+                  className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-7 break-all bg-violet-500/30 text-white ${
                     isMe ? "rounded-br-none" : "rounded-bl-none"
                   }`}
                 >
@@ -124,7 +135,9 @@ const ChatContainer = () => {
                   }
                   className="w-7 rounded-full"
                 />
-                <p className="text-gray-500">{formatMessageTime(msg.createdAt)}</p>
+                <p className="text-gray-500">
+                  {formatMessageTime(msg.createdAt)}
+                </p>
               </div>
             </div>
           );
@@ -132,18 +145,24 @@ const ChatContainer = () => {
         <div ref={scrollRef}></div>
       </div>
 
-      {/* ------- INPUT ------- */}
+      {/* INPUT */}
       <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center gap-3">
         <div className="flex-1 flex items-center bg-gray-100/20 px-3 rounded-full">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend(e)}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage(e)}
             placeholder="Send a message..."
-            className="flex-1 text-sm p-3 text-white bg-transparent outline-none"
+            className="flex-1 text-sm p-3 border-none rounded-lg outline-none text-white placeholder-gray-400"
           />
 
-          <input hidden type="file" id="chat-image" onChange={handleImage} />
+          <input
+            type="file"
+            id="chat-image"
+            hidden
+            accept="image/png, image/jpeg"
+            onChange={handleSendImage}
+          />
 
           <label htmlFor="chat-image">
             <img src={assets.gallery_icon} className="w-5 cursor-pointer" />
@@ -151,7 +170,7 @@ const ChatContainer = () => {
 
           <img
             src={assets.send_button}
-            onClick={handleSend}
+            onClick={handleSendMessage}
             className="w-7 cursor-pointer"
           />
         </div>

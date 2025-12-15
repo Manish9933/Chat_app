@@ -28,7 +28,7 @@ const CallPopup = () => {
   if (!incomingCall) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-md flex flex-col justify-center items-center text-white">
+    <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col justify-center items-center text-white">
 
       {/* Ringtone Audio Element */}
       <audio ref={ringtoneRef} src="/ringtone.mp3" loop />
@@ -47,7 +47,7 @@ const CallPopup = () => {
           onClick={rejectCall}
           className="w-16 h-16 bg-red-600 rounded-full flex justify-center items-center"
         >
-          <img src={assets.end_call_icon} className="w-8" />
+          <img src={assets.end_call} className="w-8" />
         </button>
 
         {/* Answer */}

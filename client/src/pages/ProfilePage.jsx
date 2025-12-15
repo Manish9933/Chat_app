@@ -32,8 +32,17 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen flex justify-center items-center text-white">
-      <div className="bg-[#1a1a1a]/80 p-10 rounded-xl border border-gray-600 w-[350px]">
-        <h2 className="text-xl mb-4">Edit Profile</h2>
+      <div className="relative bg-[#1a1a1a]/80 p-10 rounded-xl border border-gray-600 w-[350px]">
+
+        {/* 🔙 BACK ARROW */}
+        <img
+          src={assets.arrow_icon}
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 w-6 cursor-pointer opacity-80 hover:opacity-100 transition"
+          alt="Back"
+        />
+
+        <h2 className="text-xl mb-4 text-center">Edit Profile</h2>
 
         <label className="flex items-center gap-4 cursor-pointer">
           <input

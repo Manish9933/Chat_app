@@ -25,8 +25,16 @@ import login from './login.png'
 import call_icon from './call_icon.png';
 import video_icon from './video_icon.png';
 
-
-
+import mic_on_icon from './mic_on_icon.png';
+import mic_off_icon from './mic_off_icon.png';
+import cam_on_icon from './cam_on_icon.png';
+import cam_off_icon from './cam_off_icon.png';
+import record_on from './record_on.png';
+import record_off from './record_off.png';
+import speaker_on from './speaker_on.png';
+import speaker_off from './speaker_off.png';
+import end_call from './end_call.png';
+import end_call_icon from './end_call_icon.png';
 const assets = {
     avatar_icon,
     gallery_icon,
@@ -44,6 +52,20 @@ const assets = {
     kartik,
     call_icon,
     video_icon,
+    end_call,
+    mic_off_icon,
+    mic_on_icon,
+    cam_on_icon,
+    dhritiman,
+    harish,
+    dinesh,
+    akshaykumar,
+    record_on,
+    record_off,
+    cam_off_icon,
+    speaker_on,
+    speaker_off,
+    end_call_icon,
 }
 
 export default assets;

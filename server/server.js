@@ -16,7 +16,7 @@ app.use(cors());
 
 // SOCKET INIT
 export const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: { origin: "*" },
 });
 
 // STORE USER SOCKETS
@@ -33,31 +33,49 @@ io.on("connection", (socket) => {
   }
 
   // -------- CALL EVENTS --------
+
   socket.on("call-user", (data) => {
     const socketId = userSocketMap[data.to];
-    if (socketId) io.to(socketId).emit("incoming-call", data);
+    if (socketId) {
+      io.to(socketId).emit("incoming-call", {
+        ...data,
+        from: userId, // ✅ VERY IMPORTANT FIX
+      });
+    }
   });
 
   socket.on("answer-call", (data) => {
     const socketId = userSocketMap[data.to];
-    if (socketId) io.to(socketId).emit("call-answered", data);
+    if (socketId) {
+      io.to(socketId).emit("call-answered", data);
+    }
   });
 
-  socket.on("end-call", (data) => {
-    const socketId = userSocketMap[data.to];
-    if (socketId) io.to(socketId).emit("call-ended");
+  socket.on("end-call", ({ to }) => {
+    const socketId = userSocketMap[to];
+    if (socketId) {
+      io.to(socketId).emit("end-call");
+    }
+  });
+
+  socket.on("reject-call", ({ to }) => {
+    const socketId = userSocketMap[to];
+    if (socketId) {
+      io.to(socketId).emit("call-rejected");
+    }
   });
 
   socket.on("webrtc-candidate", (data) => {
     const socketId = userSocketMap[data.to];
-    if (socketId) io.to(socketId).emit("webrtc-candidate", data);
+    if (socketId) {
+      io.to(socketId).emit("webrtc-candidate", data);
+    }
   });
 
-  // -------- DISCONNECT --------
   socket.on("disconnect", () => {
+    console.log("User disconnected:", userId);
     delete userSocketMap[userId];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
-    console.log("User disconnected:", userId);
   });
 });
 
@@ -71,4 +89,6 @@ await connectDb();
 
 // START SERVER
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT}`)
+);

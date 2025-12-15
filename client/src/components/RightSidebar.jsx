@@ -1,53 +1,99 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useMemo } from "react";
+import assets from "../assets/assets";
 import { ChatContext } from "../../context/ChatContext";
 import { AuthContext } from "../../context/AuthContext";
-import assets from "../assets/assets";
+import { useNavigate } from "react-router-dom";
 
 const RightSidebar = () => {
   const { selectedUser, messages } = useContext(ChatContext);
-  const { onlineUsers } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const [media, setMedia] = useState([]);
-
-  useEffect(() => {
-    setMedia(messages.filter((m) => m.image).map((m) => m.image));
+  // 📸 Collect media from chat messages
+  const mediaFiles = useMemo(() => {
+    if (!messages) return [];
+    return messages.filter((m) => m.image);
   }, [messages]);
 
-  if (!selectedUser) return null;
+  if (!selectedUser) {
+    return (
+      <div className="hidden md:flex text-white flex-col items-center justify-center">
+        <img src={assets.logo_icon} className="w-10 opacity-50" />
+        <p className="mt-2 text-sm opacity-70">No User Selected</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-[#8185B2]/10 text-white p-5 rounded-l-xl overflow-y-scroll max-md:hidden">
-      <div className="text-center mt-8">
+    <div className="relative text-white px-4 pt-6 border-l border-gray-600 backdrop-blur-xl h-full">
+      
+      {/* USER PROFILE */}
+      <div className="flex flex-col items-center">
+        {/* Clickable profile picture */}
         <img
           src={selectedUser.profilePic || assets.avatar_icon}
-          className="w-20 h-20 rounded-full mx-auto"
+          onClick={() => navigate("/profile")}
+          title="Edit Profile"
+          className="
+            w-24 h-24 rounded-full mb-3 
+            border-2 border-white/20 
+            cursor-pointer hover:opacity-90 transition
+          "
         />
 
-        <h2 className="text-xl mt-2 flex justify-center items-center gap-2">
-          {selectedUser.fullName}
+        {/* Separator */}
+        <div className="w-full h-[1px] bg-white/20 my-3" />
 
-          {onlineUsers.includes(selectedUser._id) ? (
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-          ) : (
-            <span className="text-xs text-gray-400">Last seen recently</span>
-          )}
-        </h2>
-
-        <p className="opacity-70 mt-1">{selectedUser.bio || "No bio provided"}</p>
+        <h2 className="text-lg font-semibold">{selectedUser.fullName}</h2>
+        <p className="text-sm text-gray-300 mt-1 text-center">
+          {selectedUser.bio || "Available"}
+        </p>
       </div>
 
-      <hr className="border-gray-600 my-4" />
+      {/* Separator */}
+      <div className="w-full h-[1px] bg-white/20 my-5" />
 
-      <p className="font-medium">Media</p>
-      <div className="grid grid-cols-2 gap-3 mt-3 max-h-[220px] overflow-y-scroll">
-        {media.map((m, i) => (
-          <img
-            key={i}
-            src={m}
-            className="rounded cursor-pointer"
-            onClick={() => window.open(m)}
-          />
-        ))}
+      {/* MEDIA SECTION */}
+      <h3 className="mb-3 text-white/80 text-sm">Media</h3>
+
+      {mediaFiles.length === 0 ? (
+        <p className="text-xs text-gray-400">No media shared</p>
+      ) : (
+        <div className="grid grid-cols-3 gap-2 max-h-[260px] overflow-y-auto pr-1">
+          {mediaFiles.map((msg, i) => (
+            <a
+              key={i}
+              href={msg.image}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <img
+                src={msg.image}
+                alt="media"
+                className="
+                  w-full h-20 object-cover rounded-lg 
+                  border border-white/20 
+                  hover:opacity-90 transition
+                "
+              />
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* LOGOUT BUTTON */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+        <button
+          onClick={logout}
+          className="
+            px-6 py-2 rounded-full 
+            bg-gradient-to-r from-purple-600 to-indigo-500 
+            text-white font-medium 
+            shadow-lg hover:opacity-90 transition-all
+          "
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

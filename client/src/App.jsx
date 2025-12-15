@@ -17,8 +17,8 @@ const App = () => {
   return (
     <div className="bg-[url('./src/assets/bgImage.svg')] bg-cover min-h-screen">
       <Toaster />
-
-      <CallUI /> 
+      <video/>
+      {/* <CallUI />  */}
       <CallPopup />
 
       <Routes>

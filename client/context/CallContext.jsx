@@ -9,239 +9,349 @@ import { AuthContext } from "./AuthContext";
 
 export const CallContext = createContext();
 
-export const CallProvider = ({ children }) => {
-  const { socket, authUser } = useContext(AuthContext);
+const ICE_SERVERS = {
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+};
 
-  // ===============================
-  // 📞 CALL STATES
-  // ===============================
+export const CallProvider = ({ children }) => {
+  const { socket } = useContext(AuthContext);
+
+  // ---------- STATE ----------
   const [incomingCall, setIncomingCall] = useState(null);
   const [inCall, setInCall] = useState(false);
-  const [isRinging, setIsRinging] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [callType, setCallType] = useState(null);
+  const [callTime, setCallTime] = useState(0);
 
   const [isMuted, setIsMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
-  const [speakerOn, setSpeakerOn] = useState(false);
+  const [speakerOn, setSpeakerOn] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
 
+  // ---------- REFS ----------
   const receiverId = useRef(null);
-
-  // ===============================
-  // 📸 AUDIO / VIDEO STREAM
-  // ===============================
-  const localStream = useRef(null);
-  const myVideo = useRef(null);
-  const userVideo = useRef(null);
-
-  // ===============================
-  // ⏱ CALL TIMER
-  // ===============================
-  const [callTime, setCallTime] = useState(0);
+  const peerRef = useRef(null);
+  const localStreamRef = useRef(null);
   const timerRef = useRef(null);
 
-  // ===============================
-  // 🔔 RINGTONES
-  // ===============================
-  const incomingTone = new Audio("/sounds/incoming.mp3");
-  const outgoingTone = new Audio("/sounds/outgoing.mp3");
+  const myVideo = useRef(null);
+  const userVideo = useRef(null);
+  const remoteAudio = useRef(null);
 
-  incomingTone.loop = true;
-  outgoingTone.loop = true;
+  // RECORDING
+  const recorderRef = useRef(null);
+  const recordedChunks = useRef([]);
 
-  // ===============================
-  // 🧩 START CALL (Audio / Video)
-  // ===============================
+  // ---------- TIMER ----------
+  const startTimer = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setCallTime((t) => t + 1);
+    }, 1000);
+  };
+
+  // ---------- CLEANUP ----------
+  const cleanupCall = () => {
+    clearInterval(timerRef.current);
+
+    if (recorderRef.current && recorderRef.current.state !== "inactive") {
+      recorderRef.current.stop();
+    }
+
+    if (peerRef.current) {
+      peerRef.current.ontrack = null;
+      peerRef.current.onicecandidate = null;
+      peerRef.current.oniceconnectionstatechange = null;
+      peerRef.current.close();
+    }
+
+    peerRef.current = null;
+
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((t) => t.stop());
+    }
+
+    localStreamRef.current = null;
+    receiverId.current = null;
+
+    if (myVideo.current) myVideo.current.srcObject = null;
+    if (userVideo.current) userVideo.current.srcObject = null;
+    if (remoteAudio.current) remoteAudio.current.srcObject = null;
+
+    setIncomingCall(null);
+    setInCall(false);
+    setCallType(null);
+    setCallTime(0);
+
+    setIsMuted(false);
+    setCameraOff(false);
+    setSpeakerOn(true);
+    setIsRecording(false);
+  };
+
+  // ---------- TAB CLOSE ----------
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUnload = () => {
+      if (receiverId.current) {
+        socket.emit("end-call", { to: receiverId.current });
+      }
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    window.addEventListener("pagehide", handleUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+      window.removeEventListener("pagehide", handleUnload);
+    };
+  }, [socket]);
+
+  // ---------- START CALL (CALLER) ----------
   const startCall = async (user, isVideo) => {
     receiverId.current = user._id;
-
     setCallType(isVideo ? "video" : "audio");
     setInCall(true);
-    setIsMinimized(false);
 
-    // Play outgoing ringing tone
-    setIsRinging(true);
-    outgoingTone.play();
+    // USER ACTION → Chrome allows camera
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: isVideo,
+      audio: true,
+    });
 
-    // Notify receiver
+    if (myVideo.current) {
+      myVideo.current.srcObject = localStreamRef.current;
+      myVideo.current.muted = true;
+      myVideo.current.playsInline = true;
+    }
+
+    peerRef.current = new RTCPeerConnection(ICE_SERVERS);
+
+    // 🔥 ADD TRACKS BEFORE OFFER (CRITICAL)
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
+
+    peerRef.current.onicecandidate = (e) => {
+      if (e.candidate) {
+        socket.emit("webrtc-candidate", {
+          to: receiverId.current,
+          candidate: e.candidate,
+        });
+      }
+    };
+
+    peerRef.current.oniceconnectionstatechange = () => {
+      const state = peerRef.current.iceConnectionState;
+      if (state === "disconnected" || state === "failed") {
+        endCall();
+      }
+    };
+
+    peerRef.current.ontrack = (e) => {
+      if (isVideo && userVideo.current) {
+        userVideo.current.srcObject = e.streams[0];
+        setTimeout(() => userVideo.current.play().catch(() => {}), 300);
+      } else if (!isVideo && remoteAudio.current) {
+        remoteAudio.current.srcObject = e.streams[0];
+        remoteAudio.current.muted = false;
+        setTimeout(() => remoteAudio.current.play().catch(() => {}), 300);
+      }
+    };
+
+    const offer = await peerRef.current.createOffer();
+    await peerRef.current.setLocalDescription(offer);
+
     socket.emit("call-user", {
-      from: authUser._id,
-      fromName: authUser.fullName,
-      to: user._id,
+      to: receiverId.current,
+      offer,
       type: isVideo ? "video" : "audio",
-      profilePic: authUser.profilePic,
     });
   };
 
   const startAudioCall = (user) => startCall(user, false);
   const startVideoCall = (user) => startCall(user, true);
 
-  // ===============================
-  // 📥 INCOMING CALL
-  // ===============================
+  // ---------- SOCKET EVENTS ----------
   useEffect(() => {
     if (!socket) return;
 
     socket.on("incoming-call", (data) => {
-      // Stop outgoing tone if caller receives immediate callback
-      outgoingTone.pause();
-
       receiverId.current = data.from;
-
       setIncomingCall(data);
       setCallType(data.type);
-
-      // Vibrate (mobile)
-      if (navigator.vibrate) navigator.vibrate(500);
-
-      // Play ringtone
-      setIsRinging(true);
-      incomingTone.play();
     });
 
-    return () => socket.off("incoming-call");
+    socket.on("call-answered", async ({ answer }) => {
+      await peerRef.current.setRemoteDescription(answer);
+      startTimer();
+    });
+
+    socket.on("webrtc-candidate", async ({ candidate }) => {
+      if (candidate) await peerRef.current.addIceCandidate(candidate);
+    });
+
+    socket.on("end-call", cleanupCall);
+    socket.on("call-rejected", cleanupCall);
+
+    return () => socket.removeAllListeners();
   }, [socket]);
 
-  // ===============================
-  // ✔ ANSWER CALL
-  // ===============================
+  // ---------- ANSWER (RECEIVER) ----------
   const answerCall = async () => {
-    setInCall(true);
     setIncomingCall(null);
-    setIsMinimized(false);
+    setInCall(true);
 
-    incomingTone.pause();
-    outgoingTone.pause();
-    setIsRinging(false);
-
-    setCallTimerStart();
-
-    socket.emit("answer-call", { to: receiverId.current });
-
-    if (callType === "video") {
-      localStream.current = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      myVideo.current.srcObject = localStream.current;
-    }
-  };
-
-  // ===============================
-  // RECEIVER ACCEPTED CALL
-  // ===============================
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("call-answered", () => {
-      outgoingTone.pause();
-      setIsRinging(false);
-      setCallTimerStart();
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: callType === "video",
+      audio: true,
     });
 
-    return () => socket.off("call-answered");
-  }, [socket]);
+    if (myVideo.current) {
+      myVideo.current.srcObject = localStreamRef.current;
+      myVideo.current.muted = true;
+      myVideo.current.playsInline = true;
+    }
 
-  // ===============================
-  // ❌ END CALL (Both sides)
-  // ===============================
-  const endCall = () => {
-    socket.emit("end-call", { to: receiverId.current });
+    peerRef.current = new RTCPeerConnection(ICE_SERVERS);
 
-    incomingTone.pause();
-    outgoingTone.pause();
-    setIsRinging(false);
+    // 🔥 ADD TRACKS BEFORE ANSWER
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
 
-    stopCallTimer();
+    peerRef.current.onicecandidate = (e) => {
+      if (e.candidate) {
+        socket.emit("webrtc-candidate", {
+          to: receiverId.current,
+          candidate: e.candidate,
+        });
+      }
+    };
 
-    localStream.current?.getTracks().forEach((t) => t.stop());
-    myVideo.current.srcObject = null;
+    peerRef.current.oniceconnectionstatechange = () => {
+      const state = peerRef.current.iceConnectionState;
+      if (state === "disconnected" || state === "failed") {
+        endCall();
+      }
+    };
 
-    setInCall(false);
-    setIncomingCall(null);
-    setCallType(null);
-    setIsMinimized(false);
+    peerRef.current.ontrack = (e) => {
+      if (callType === "video" && userVideo.current) {
+        userVideo.current.srcObject = e.streams[0];
+        setTimeout(() => userVideo.current.play().catch(() => {}), 300);
+      } else if (callType === "audio" && remoteAudio.current) {
+        remoteAudio.current.srcObject = e.streams[0];
+        remoteAudio.current.muted = false;
+        setTimeout(() => remoteAudio.current.play().catch(() => {}), 300);
+      }
+    };
 
-    setIsMuted(false);
-    setCameraOff(false);
-    setSpeakerOn(false);
+    await peerRef.current.setRemoteDescription(incomingCall.offer);
+
+    const answer = await peerRef.current.createAnswer();
+    await peerRef.current.setLocalDescription(answer);
+
+    socket.emit("answer-call", {
+      to: receiverId.current,
+      answer,
+    });
+
+    startTimer();
   };
 
-  useEffect(() => {
-    if (!socket) return;
+  // ---------- END ----------
+  const endCall = () => {
+    if (receiverId.current) {
+      socket.emit("end-call", { to: receiverId.current });
+    }
+    cleanupCall();
+  };
 
-    socket.on("call-ended", () => endCall());
-
-    return () => socket.off("call-ended");
-  }, [socket]);
-
-  // ===============================
-  // 🎚 TOGGLES
-  // ===============================
+  // ---------- CONTROLS ----------
   const toggleMute = () => {
-    setIsMuted((prev) => !prev);
+    const track = localStreamRef.current?.getAudioTracks()[0];
+    if (!track) return;
+    track.enabled = !track.enabled;
+    setIsMuted(!track.enabled);
   };
 
   const toggleCamera = () => {
-    setCameraOff((prev) => !prev);
+    const track = localStreamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    track.enabled = !track.enabled;
+    setCameraOff(!track.enabled);
   };
 
   const toggleSpeaker = () => {
-    setSpeakerOn((prev) => !prev);
+    if (!remoteAudio.current) return;
+    remoteAudio.current.muted = speakerOn;
+    remoteAudio.current.volume = speakerOn ? 0 : 1;
+    setSpeakerOn(!speakerOn);
   };
 
-  const minimizeCall = () => setIsMinimized(true);
-  const restoreCall = () => setIsMinimized(false);
+  // ---------- RECORDING ----------
+  const startRecording = () => {
+    if (!localStreamRef.current) return;
 
-  // ===============================
-  // ⏱ TIMER HANDLING
-  // ===============================
-  const setCallTimerStart = () => {
-    setCallTime(0);
-    timerRef.current = setInterval(() => {
-      setCallTime((prev) => prev + 1);
-    }, 1000);
+    recorderRef.current = new MediaRecorder(localStreamRef.current);
+    recordedChunks.current = [];
+
+    recorderRef.current.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.current.push(e.data);
+    };
+
+    recorderRef.current.onstop = () => {
+      const blob = new Blob(recordedChunks.current, {
+        type: "audio/webm",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "call-recording.webm";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    recorderRef.current.start();
+    setIsRecording(true);
   };
 
-  const stopCallTimer = () => {
-    clearInterval(timerRef.current);
+  const stopRecording = () => {
+    if (recorderRef.current) {
+      recorderRef.current.stop();
+      setIsRecording(false);
+    }
   };
-
-  // ===============================
-  // RETURN CONTEXT
-  // ===============================
 
   return (
     <CallContext.Provider
       value={{
-        // UI State
         incomingCall,
         inCall,
         callType,
-        isRinging,
-        isMinimized,
         callTime,
 
-        // Functions
         startAudioCall,
         startVideoCall,
         answerCall,
         endCall,
-        minimizeCall,
-        restoreCall,
 
         toggleMute,
         toggleCamera,
         toggleSpeaker,
 
-        // Status
+        startRecording,
+        stopRecording,
+        isRecording,
+
         isMuted,
         cameraOff,
         speakerOn,
 
-        // Refs
         myVideo,
         userVideo,
+        remoteAudio,
       }}
     >
       {children}
