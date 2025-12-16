@@ -45,6 +45,7 @@ const LoginPage = () => {
             className="p-2 rounded bg-gray-900 border"
             placeholder="Full Name"
             required
+            autoComplete="full name"
             onChange={(e) => setFullName(e.target.value)}
           />
         )}
@@ -56,6 +57,7 @@ const LoginPage = () => {
               placeholder="Email"
               type="email"
               required
+              autoComplete="email"
               onChange={(e) => setEmail(e.target.value)}
             />
 
