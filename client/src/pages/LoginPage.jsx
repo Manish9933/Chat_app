@@ -64,6 +64,7 @@ const LoginPage = () => {
               placeholder="Password"
               type="password"
               required
+              autoComplete="current-password"
               onChange={(e) => setPassword(e.target.value)}
             />
           </>
