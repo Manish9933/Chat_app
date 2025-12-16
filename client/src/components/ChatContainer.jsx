@@ -101,30 +101,34 @@ const ChatContainer = () => {
       <div className="flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-10">
         {messages.map((msg) => {
           const isMe =
-            msg.senderId === authUser._id ||
-            msg.senderId?._id === authUser._id;
+            msg.senderId === authUser._id || msg.senderId?._id === authUser._id;
+
+          const senderName = isMe ? authUser.fullName : selectedUser.fullName;
 
           return (
             <div
               key={msg._id}
-              className={`flex items-end gap-2 ${
-                !isMe && "flex-row-reverse"
-              }`}
+              className={`flex items-end gap-2 ${!isMe && "flex-row-reverse"}`}
             >
-              {msg.image ? (
-                <img
-                  src={msg.image}
-                  className="max-w-[230px] rounded-lg mb-8 border border-gray-700"
-                />
-              ) : (
-                <p
-                  className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-7 break-all bg-violet-500/30 text-white ${
-                    isMe ? "rounded-br-none" : "rounded-bl-none"
-                  }`}
-                >
-                  {msg.text}
-                </p>
-              )}
+              <div className="flex flex-col">
+                {/* ✅ SENDER NAME */}
+                <p className="text-xs text-gray-400 mb-1">{senderName}</p>
+
+                {msg.image ? (
+                  <img
+                    src={msg.image}
+                    className="max-w-[230px] rounded-lg border border-gray-700"
+                  />
+                ) : (
+                  <p
+                    className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg break-all bg-violet-500/30 text-white ${
+                      isMe ? "rounded-br-none" : "rounded-bl-none"
+                    }`}
+                  >
+                    {msg.text}
+                  </p>
+                )}
+              </div>
 
               <div className="text-center text-xs">
                 <img
@@ -142,6 +146,7 @@ const ChatContainer = () => {
             </div>
           );
         })}
+
         <div ref={scrollRef}></div>
       </div>
 

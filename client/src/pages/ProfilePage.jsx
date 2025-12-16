@@ -42,7 +42,7 @@ const ProfilePage = () => {
           alt="Back"
         />
 
-        <h2 className="text-xl mb-4 text-center">Edit Profile</h2>
+        <h2 className="text-xl mb-4 text-center">Edit Profile User</h2>
 
         <label className="flex items-center gap-4 cursor-pointer">
           <input

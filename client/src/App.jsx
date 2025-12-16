@@ -4,6 +4,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
+import UserProfile from './pages/UserProfile.jsx'; 
+
 
 import { Toaster } from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext.jsx";
@@ -18,15 +20,14 @@ const App = () => {
     <div className="bg-[url('./src/assets/bgImage.svg')] bg-cover min-h-screen">
       <Toaster />
       <video/>
-      {/* <CallUI />  */}
+      
       <CallPopup />
-
       <Routes>
         <Route
           path="/"
           element={authUser ? <HomePage /> : <Navigate to="/login" />}
         />
-
+        <Route path="/profile/:userId" element={<UserProfile />} />
         <Route
           path="/login"
           element={!authUser ? <LoginPage /> : <Navigate to="/" />}

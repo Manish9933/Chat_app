@@ -70,7 +70,7 @@ const Sidebar = () => {
                   }}
                   className="w-full text-left py-2 text-sm"
                 >
-                  Edit Profile
+                  Edit Profile User
                 </button>
 
                 <hr className="my-2 border-t border-gray-500" />
