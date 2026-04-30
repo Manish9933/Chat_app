@@ -34,6 +34,14 @@
   animation: pop 0.25s ease-out forwards;
 }
 
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* Premium Background Animations */
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }

@@ -41,13 +41,13 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`bg-white/5 backdrop-blur-md h-full p-3 md:p-5 text-white overflow-y-scroll border-r border-white/10
+      className={`bg-white/5 backdrop-blur-md h-full px-5 py-4 md:px-6 md:py-6 text-white overflow-y-scroll border-r border-white/10
         ${selectedUser ? "max-md:hidden" : "w-full"}`}
     >
       {/* Header */}
       <div className="pb-5">
-        <div className="flex justify-between items-center">
-          <img src={assets.logo} alt="logo" className="max-w-40" />
+        <div className="flex justify-between items-center px-1">
+          <img src={assets.logo} alt="logo" className="max-w-[140px] md:max-w-40" />
 
           {/* Menu (click to open) */}
           <div ref={menuRef} className="relative">
@@ -116,10 +116,10 @@ const Sidebar = () => {
         <div className="h-[1px] bg-white/10 mx-2 mt-4" />
 
         {/* Special Functionality: Online Filter */}
-        <div className="flex items-center justify-between px-2 mt-4 mb-2">
+        <div className="flex items-center justify-between px-1 mt-6 mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-white/50 uppercase tracking-wider">Contacts</span>
-            <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40">{filteredUsers.length}</span>
+            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Contacts</span>
+            <span className="text-[9px] bg-white/5 border border-white/5 px-1.5 py-0.5 rounded text-white/30">{filteredUsers.length}</span>
           </div>
           
           <label className="flex items-center gap-2 cursor-pointer group">

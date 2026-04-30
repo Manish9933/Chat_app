@@ -107,11 +107,11 @@ const ChatContainer = () => {
   return (
     <div className="w-full h-full overflow-hidden flex flex-col relative backdrop-blur-md bg-white/5">
       {/* HEADER */}
-      <div className="flex items-center gap-2 py-3 px-4 border-b border-white/5 bg-black/20 backdrop-blur-xl">
+      <div className="flex items-center gap-3 py-3.5 px-4 border-b border-white/5 bg-black/30 backdrop-blur-2xl z-20">
         {/* Back Button for Mobile */}
         <button
           onClick={() => setSelectedUser(null)}
-          className="flex items-center justify-center w-10 h-10 -ml-2 hover:bg-white/5 rounded-full transition-colors md:hidden"
+          className="flex items-center justify-center w-10 h-10 -ml-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all md:hidden active:scale-90"
         >
           <img src={assets.arrow_icon} className="w-5 opacity-80" alt="back" />
         </button>
@@ -137,17 +137,17 @@ const ChatContainer = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button 
             onClick={() => startAudioCall(selectedUser)}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 bg-white/5 border border-white/5 rounded-full transition-all active:scale-95"
           >
             <img src={assets.call_icon} className="w-5 opacity-80" alt="call" />
           </button>
           
           <button 
             onClick={() => startVideoCall(selectedUser)}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 bg-white/5 border border-white/5 rounded-full transition-all active:scale-95"
           >
             <img src={assets.video_icon} className="w-6 opacity-80" alt="video" />
           </button>
@@ -172,7 +172,7 @@ const ChatContainer = () => {
                 />
               )}
 
-              <div className={`flex flex-col max-w-[80%] md:max-w-[70%] ${isMe ? "items-end" : "items-start"}`}>
+              <div className={`flex flex-col max-w-[85%] md:max-w-[70%] ${isMe ? "items-end" : "items-start"}`}>
                 {/* ✅ MEDIA RENDERING */}
                 {(msg.file || msg.image) && (
                   <div className="mb-1 rounded-2xl overflow-hidden border border-white/5">
