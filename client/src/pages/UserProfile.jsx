@@ -57,31 +57,17 @@ const UserProfile = () => {
 
   return (
     /* 🌌 PAGE BACKGROUND */
-    <div className="min-h-screen flex items-center justify-center bg-black/40 text-white">
+    <div className="min-h-screen w-full flex flex-col bg-black/40 backdrop-blur-3xl sm:items-center sm:justify-center sm:p-4 text-white">
         
 
       {/* 🧊 GLASS CARD (same feel as chat UI) */}
-      <div
-        className="
-          w-[95%] md:w-[85%] lg:w-[75%]
-          h-[90vh]
-          rounded-2xl
-          border border-white/20
-          backdrop-blur-xl
-          bg-white/5
-          shadow-2xl
-          overflow-hidden
-          p-6
-        "
-      >
+      <div className="w-full sm:w-[85%] lg:w-[60%] flex-1 sm:flex-none sm:rounded-[2.5rem] sm:border border-white/10 backdrop-blur-xl bg-white/5 shadow-2xl overflow-hidden p-6 sm:p-10 relative flex flex-col">
         {/* 🔙 HEADER */}
-        <div className="flex items-center gap-3 mb-6">
-          <img
-            src={assets.arrow_icon}
-            onClick={() => navigate(-1)}
-            className="w-7 cursor-pointer"
-          />
-          <h2 className="text-lg font-semibold">Profile</h2>
+        <div className="flex items-center gap-4 mb-8 relative z-20">
+          <button onClick={() => navigate(-1)} className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white/70 active:scale-90">
+            <img src={assets.arrow_icon} className="w-6" alt="Back" />
+          </button>
+          <h2 className="text-xl font-bold tracking-tight">Profile</h2>
         </div>
 
         {/* 👤 PROFILE INFO */}

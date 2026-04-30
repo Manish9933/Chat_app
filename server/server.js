@@ -6,7 +6,9 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.join(__dirname, ".env") });
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 
 import cors from "cors";
 import http from "http";
@@ -23,12 +25,33 @@ const server = http.createServer(app);
 // MIDDLEWARE
 app.use(express.json({ limit: "70mb" }));
 app.use(express.urlencoded({ limit: "70mb", extended: true }));
-const allowedOrigins = process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  "https://chat-app-roan-eta.vercel.app" // Your main production URL
+];
+
+if (process.env.CLIENT_URL) {
+  const clientUrl = process.env.CLIENT_URL.replace(/\/$/, "");
+  if (!allowedOrigins.includes(clientUrl)) allowedOrigins.push(clientUrl);
+}
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+    // 1. Allow if no origin (like mobile apps or curl)
+    // 2. Allow if in the allowed list
+    // 3. Allow ANY Vercel preview URL (ends with .vercel.app)
+    // 4. Allow all in development
+    if (
+      !origin || 
+      allowedOrigins.includes(origin) || 
+      origin.endsWith(".vercel.app") || 
+      process.env.NODE_ENV !== "production"
+    ) {
       callback(null, true);
     } else {
+      console.log("CORS Blocked for:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -128,18 +151,10 @@ io.on("connection", (socket) => {
 });
 
 // ROUTES
+app.get("/", (req, res) => res.send("🚀 Chat App Backend is Running!"));
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 app.get("/api/status", (req, res) => res.send("Server online ✔️"));
-
-// PRODUCTION CONFIG
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../client/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
-  });
-}
 
 // GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {

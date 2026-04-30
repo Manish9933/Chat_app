@@ -34,6 +34,14 @@
   animation: pop 0.25s ease-out forwards;
 }
 
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* Premium Background Animations */
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }
@@ -59,6 +67,14 @@
     radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
     radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
     radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+}
+
+.bg-whatsapp {
+  background-color: transparent;
+  background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+  background-blend-mode: overlay;
+  opacity: 0.03;
+  filter: invert(1) brightness(2);
 }
 
 .noise {

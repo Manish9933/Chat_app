@@ -30,8 +30,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl grid lg:grid-cols-2 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl shadow-black/50 animate-pop">
+    <div className="min-h-screen flex items-center justify-center sm:p-6 md:p-10">
+      <div className="w-full h-screen sm:h-auto max-w-5xl grid lg:grid-cols-2 bg-white/5 backdrop-blur-2xl sm:rounded-[3rem] sm:border border-white/10 overflow-hidden shadow-2xl shadow-black/50 animate-pop">
         
         {/* Left Side: Branding & Info */}
         <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-r border-white/10">
@@ -70,17 +70,17 @@ const LoginPage = () => {
         </div>
 
         {/* Right Side: Form */}
-        <div className="p-8 lg:p-16 flex flex-col justify-center">
+        <div className="p-6 md:p-8 lg:p-16 flex flex-col justify-center">
           {/* Logo for Mobile */}
           <div className="lg:hidden flex justify-center mb-8">
-            <img src={assets.logo} className="w-40 object-contain" alt="Logo" />
+            <img src={assets.logo} className="w-44 object-contain" alt="Logo" />
           </div>
 
-          <div className="mb-10 text-center lg:text-left">
-            <h3 className="text-3xl font-bold text-white mb-2">
+          <div className="mb-6 lg:mb-10 text-center lg:text-left">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
               {state === "Sign up" ? "Create Account" : "Welcome Back"}
             </h3>
-            <p className="text-white/50">
+            <p className="text-white/70 text-sm md:text-base">
               {state === "Sign up" 
                 ? "Join our community and start chatting today." 
                 : "Please enter your details to sign in."}
@@ -142,23 +142,19 @@ const LoginPage = () => {
               </div>
             )}
 
-            <button className="w-full py-4 mt-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-violet-900/20 transform active:scale-[0.98] transition-all">
+            <button className="w-full py-4.5 mt-6 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-violet-900/40 transform active:scale-[0.98] transition-all text-lg">
               {state === "Sign up" 
                 ? (step2 ? "Complete Registration" : "Next Step") 
                 : "Sign In"}
             </button>
 
-            <div className="flex items-center gap-4 my-8">
-              <div className="h-[1px] flex-1 bg-white/10"></div>
-              <span className="text-white/20 text-xs font-medium uppercase tracking-widest">Or continue with</span>
-              <div className="h-[1px] flex-1 bg-white/10"></div>
-            </div>
 
-            <p className="text-center text-white/40 text-sm">
+
+            <p className="text-center text-white/50 text-sm mt-8">
               {state === "Sign up" ? "Already have an account?" : "Don't have an account yet?"}
               <button
                 type="button"
-                className="ml-2 text-violet-400 font-semibold hover:text-violet-300 transition-colors"
+                className="ml-2 text-violet-400 font-bold hover:text-violet-300 transition-colors underline-offset-4 hover:underline"
                 onClick={() => {
                   setState(state === "Sign up" ? "login" : "Sign up");
                   setStep2(false);
