@@ -15,9 +15,9 @@ const HomePage = () => {
   const { selectedUser } = useContext(ChatContext);
 
   return (
-    <div className="w-full h-[100dvh] sm:px-[5%] sm:py-[2%] lg:px-[10%] lg:py-[5%]">
+    <div className="w-full h-[100dvh] sm:px-[5%] sm:py-[2%] lg:px-[10%] lg:py-[5%] flex flex-col">
       <div
-        className={`backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden h-full grid relative shadow-2xl shadow-black/50
+        className={`w-full backdrop-blur-2xl bg-white/5 border-white/10 sm:border sm:rounded-3xl overflow-hidden flex-1 grid relative shadow-2xl shadow-black/50
         ${
           selectedUser
             ? "grid-cols-1 md:grid-cols-[1fr_1.5fr_1fr] xl:grid-cols-[1fr_2fr_1fr]"
@@ -26,9 +26,15 @@ const HomePage = () => {
       >
         <Sidebar />
         
-        {/* On mobile, ONLY show the Sidebar if no user is selected. 
-            On desktop, always show the Chat area (Welcome screen). */}
-        <div className={`h-full ${!selectedUser ? "hidden md:flex" : "flex"}`}>
+        {/* MOBILE VIEW: Only show ChatContainer if a user is selected */}
+        {selectedUser && (
+          <div className="flex w-full h-full md:hidden">
+            <ChatContainer />
+          </div>
+        )}
+
+        {/* DESKTOP VIEW: Always show ChatContainer (shows Welcome screen if no user selected) */}
+        <div className="hidden md:flex h-full w-full">
           <ChatContainer />
         </div>
 

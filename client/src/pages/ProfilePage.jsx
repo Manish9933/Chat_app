@@ -31,8 +31,8 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="relative w-full max-w-md bg-white/5 backdrop-blur-3xl p-10 rounded-[2rem] border border-white/10 shadow-2xl shadow-black/50 animate-pop overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center sm:p-4">
+      <div className="relative w-full h-full sm:h-auto max-w-md bg-white/5 backdrop-blur-3xl p-8 sm:p-10 sm:rounded-[2rem] sm:border border-white/10 shadow-2xl shadow-black/50 animate-pop overflow-hidden">
         
         {/* Decorative background glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-violet-600/20 rounded-full blur-3xl"></div>

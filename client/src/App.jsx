@@ -17,7 +17,7 @@ const App = () => {
   const { authUser } = useContext(AuthContext);
 
   return (
-    <div className="relative min-h-screen w-full bg-mesh overflow-hidden">
+    <div className="relative min-h-screen w-full bg-mesh overflow-hidden flex flex-col">
       {/* Noise Overlay */}
       <div className="noise" />
 
@@ -27,7 +27,7 @@ const App = () => {
       <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
       <div className="absolute -bottom-8 right-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
 
-      <div className="relative z-10 min-h-screen">
+      <div className="relative z-10 min-h-screen w-full flex flex-col">
         <Toaster />
         
         <CallPopup />

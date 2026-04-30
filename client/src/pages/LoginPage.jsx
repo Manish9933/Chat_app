@@ -30,8 +30,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl grid lg:grid-cols-2 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl shadow-black/50 animate-pop">
+    <div className="min-h-screen flex items-center justify-center sm:p-4">
+      <div className="w-full h-full sm:h-auto max-w-5xl grid lg:grid-cols-2 bg-white/5 backdrop-blur-2xl sm:rounded-[2.5rem] sm:border border-white/10 overflow-hidden shadow-2xl shadow-black/50 animate-pop">
         
         {/* Left Side: Branding & Info */}
         <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-r border-white/10">
@@ -70,14 +70,14 @@ const LoginPage = () => {
         </div>
 
         {/* Right Side: Form */}
-        <div className="p-8 lg:p-16 flex flex-col justify-center">
+        <div className="p-6 md:p-8 lg:p-16 flex flex-col justify-center">
           {/* Logo for Mobile */}
-          <div className="lg:hidden flex justify-center mb-8">
-            <img src={assets.logo} className="w-40 object-contain" alt="Logo" />
+          <div className="lg:hidden flex justify-center mb-6">
+            <img src={assets.logo} className="w-32 object-contain" alt="Logo" />
           </div>
 
-          <div className="mb-10 text-center lg:text-left">
-            <h3 className="text-3xl font-bold text-white mb-2">
+          <div className="mb-6 lg:mb-10 text-center lg:text-left">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
               {state === "Sign up" ? "Create Account" : "Welcome Back"}
             </h3>
             <p className="text-white/50">
