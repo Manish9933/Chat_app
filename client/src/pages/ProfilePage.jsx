@@ -53,7 +53,7 @@ const ProfilePage = () => {
           </button>
           <div>
             <h2 className="text-xl font-bold text-white">Profile Settings</h2>
-            <p className="text-white/40 text-xs mt-0.5">Update your personal information</p>
+            <p className="text-white/60 text-xs mt-0.5">Update your personal information</p>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ const ProfilePage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
           <div className="space-y-2">
-            <label className="text-xs font-medium text-white/50 ml-1 uppercase tracking-wider">Full Name</label>
+            <label className="text-xs font-bold text-white/70 ml-1 uppercase tracking-widest">Full Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -94,7 +94,7 @@ const ProfilePage = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-white/50 ml-1 uppercase tracking-wider">Bio</label>
+            <label className="text-xs font-bold text-white/70 ml-1 uppercase tracking-widest">Bio</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}

@@ -99,7 +99,7 @@ const Sidebar = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             type="text"
-            className="bg-transparent border-none outline-none text-white text-sm placeholder-white/20 flex-1"
+            className="bg-transparent border-none outline-none text-white text-sm placeholder:text-white/40 flex-1"
             placeholder="Search contacts..."
           />
           {search && (
