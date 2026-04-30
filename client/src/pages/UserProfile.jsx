@@ -52,7 +52,7 @@ const UserProfile = () => {
 
   // 📸 Collect media
   const mediaFiles = useMemo(() => {
-    return messages?.filter((m) => m.image) || [];
+    return messages?.filter((m) => m.fileType === "image" || m.image) || [];
   }, [messages]);
 
   return (
@@ -107,12 +107,12 @@ const UserProfile = () => {
             {mediaFiles.map((msg, i) => (
               <a
                 key={i}
-                href={msg.image}
+                href={msg.file || msg.image}
                 target="_blank"
                 rel="noreferrer"
               >
                 <img
-                  src={msg.image}
+                  src={msg.file || msg.image}
                   className="
                     w-full h-32 object-cover
                     rounded-xl

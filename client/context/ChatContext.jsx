@@ -44,37 +44,67 @@ export const ChatProvider = ({ children }) => {
     }
 
     try {
-      // Create message object with proper structure
-      const messageData = {
+      const tempId = "temp-" + Date.now();
+      const optimisticMsg = {
+        _id: tempId,
+        senderId: authUser._id,
+        receiverId: selectedUser._id,
         text: msgBody.text || "",
         file: msgBody.file || null,
         fileType: msgBody.fileType || "text",
         createdAt: new Date().toISOString(),
+        isOptimistic: true,
       };
 
-      console.log(`Sending message: ${messageData.text.length} chars text, ${messageData.file?.length || 0} chars file`);
+      setMessages((prev) => [...prev, optimisticMsg]);
+
+      const messageData = {
+        text: msgBody.text || "",
+        file: msgBody.file || null,
+        fileType: msgBody.fileType || "text",
+      };
 
       const { data } = await axios.post(`/api/messages/send/${selectedUser._id}`, messageData);
 
       if (data.success) {
-        // Use the EXACT data from server to ensure URLs are correct
         const newMessage = {
           ...data.newMessage,
-          senderId: authUser._id, // Keep local sender ID for consistency
+          senderId: authUser._id,
         };
         
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages((prev) => 
+          prev.map(m => m._id === tempId ? newMessage : m)
+        );
         
-        // Emit socket event with the FULL server-verified message
         if (socket) {
           socket.emit("sendMessage", {
             receiverId: selectedUser._id,
             message: newMessage
           });
         }
+      } else {
+        setMessages((prev) => prev.filter(m => m._id !== tempId));
+        toast.error(data.message || "Failed to send message");
       }
     } catch (err) {
-      toast.error(err.message || "Failed to send message");
+      setMessages((prev) => prev.filter(m => !m._id.toString().startsWith("temp-")));
+      console.error("SendMessage Error:", err);
+      toast.error(err.response?.data?.message || err.message || "Failed to send message");
+    }
+  };
+ 
+  // ---------------- DELETE MESSAGE ----------------
+  const deleteMessage = async (msgId) => {
+    try {
+      const { data } = await axios.delete(`/api/messages/${msgId}`);
+      if (data.success) {
+        setMessages((prev) => prev.filter((m) => m._id !== msgId));
+        toast.success("Message deleted");
+      } else {
+        toast.error(data.message || "Failed to delete message");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Failed to delete message");
     }
   };
 
@@ -168,6 +198,7 @@ export const ChatProvider = ({ children }) => {
         getUsers,
         getMessages,
         sendMessage,
+        deleteMessage,
         setSelectedUser,
         setUnseenMessages,
         setMessages,

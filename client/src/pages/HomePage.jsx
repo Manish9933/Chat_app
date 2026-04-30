@@ -15,14 +15,11 @@ const HomePage = () => {
   const { selectedUser } = useContext(ChatContext);
 
   return (
-    <div className="w-full h-[100dvh] sm:p-2 md:p-4 lg:p-8 xl:p-12 flex flex-col bg-black/10 sm:bg-transparent">
+    <div className="w-full h-[100dvh] md:h-screen flex items-center justify-center p-0 md:p-4 lg:p-6 xl:p-8 bg-black/5">
       <div
-        className={`w-full h-full flex-1 relative overflow-hidden flex
-        ${
-          selectedUser
-            ? "sm:bg-white/5 sm:backdrop-blur-2xl sm:border sm:border-white/10 sm:rounded-[2.5rem] sm:shadow-2xl sm:shadow-black/50"
-            : "sm:bg-white/5 sm:backdrop-blur-2xl sm:border sm:border-white/10 sm:rounded-[2.5rem] sm:shadow-2xl sm:shadow-black/50"
-        }`}
+        className={`w-full h-full max-w-[1600px] mx-auto relative overflow-hidden flex 
+        bg-[#0b0a1a]/40 backdrop-blur-3xl
+        md:rounded-[2rem] md:border md:border-white/10 md:shadow-[0_20px_50px_rgba(0,0,0,0.5)]`}
       >
         {/* DESKTOP VIEW: Sidebar + ChatContainer */}
         <div className="hidden md:flex w-full h-full">
@@ -31,7 +28,7 @@ const HomePage = () => {
              <ChatContainer />
            </div>
            {selectedUser && (
-             <div className="hidden xl:block w-[300px] border-l border-white/5 bg-black/10">
+             <div className="hidden xl:block w-[350px] border-l border-white/5 bg-white/[0.02]">
                <RightSidebar />
              </div>
            )}

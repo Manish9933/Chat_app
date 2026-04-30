@@ -31,7 +31,6 @@ const Sidebar = () => {
 
   useEffect(() => {
     getUsers();
-    // close menu on outside click
     const handleOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
     };
@@ -41,52 +40,60 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`h-full px-5 py-4 md:px-6 md:py-6 text-white overflow-y-scroll border-r border-white/10
-        ${selectedUser ? "max-md:hidden" : "w-full md:w-[350px] lg:w-[400px]"}
-        bg-white/5 backdrop-blur-md md:bg-transparent md:backdrop-blur-none shrink-0`}
+      className={`h-full flex flex-col text-white border-r border-white/10 transition-all duration-300
+        ${selectedUser ? "max-md:hidden" : "w-full"}
+        md:w-[320px] lg:w-[380px] shrink-0 bg-white/[0.02] relative z-40`}
     >
       {/* Header */}
-      <div className="pb-5">
+      <div className="p-5 md:p-6 pb-2">
         <div className="flex justify-between items-center px-1">
-          <img src={assets.logo} alt="logo" className="max-w-[140px] md:max-w-40" />
+          <img src={assets.logo} alt="logo" className="max-w-[140px] md:max-w-40 drop-shadow-2xl" />
 
-          {/* Menu (click to open) */}
+          {/* 💎 ELITE SIDEBAR MENU */}
           <div ref={menuRef} className="relative">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setMenuOpen((v) => !v);
-              }}
-              aria-label="menu"
-              className="p-1 rounded hover:bg-white/5"
+              onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
+              className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-500 
+                ${menuOpen ? "bg-violet-500/30 rotate-90 border-violet-400/40" : "bg-white/5 hover:bg-white/10 border-white/10"} 
+                border backdrop-blur-xl shadow-2xl active:scale-90`}
             >
-              <img src={assets.menu_icon} alt="menu" className="max-h-5" />
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
             </button>
 
             {menuOpen && (
-              <div className="absolute top-full right-0 mt-2 z-50 w-48 p-2 rounded-2xl bg-white/10 backdrop-blur-3xl border border-white/10 shadow-2xl animate-pop">
+              <div className="absolute top-full right-0 mt-3 z-[100] w-64 p-3 rounded-[2.5rem] bg-[#1a1625]/95 backdrop-blur-[60px] border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.8)] animate-pop overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-indigo-500/10 pointer-events-none"></div>
+                
                 <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    navigate("/profile");
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                  onClick={() => { setMenuOpen(false); navigate("/profile"); }}
+                  className="relative w-full flex items-center gap-4 px-5 py-4 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white hover:bg-white/10 rounded-[1.8rem] transition-all group"
                 >
-                  <span className="text-lg">👤</span>
+                  <div className="w-10 h-10 rounded-2xl bg-violet-500/20 flex items-center justify-center border border-violet-400/30 group-hover:scale-110 group-hover:rotate-3 transition-all">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400 drop-shadow-[0_0_8px_rgba(167,139,250,0.6)]"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
                   My Profile
                 </button>
 
-                <div className="h-[1px] bg-white/5 my-1 mx-2" />
+                <button
+                  onClick={() => { setMenuOpen(false); navigate("/settings"); }}
+                  className="relative w-full flex items-center gap-4 px-5 py-4 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white hover:bg-white/10 rounded-[1.8rem] transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-400/30 group-hover:scale-110 group-hover:-rotate-3 transition-all">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400 drop-shadow-[0_0_8px_rgba(129,140,248,0.6)]"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  </div>
+                  System Settings
+                </button>
+
+                <div className="h-[1px] bg-white/10 my-2 mx-4" />
 
                 <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    logout();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all"
+                  onClick={() => { setMenuOpen(false); logout(); }}
+                  className="relative w-full flex items-center gap-4 px-5 py-4 text-xs font-black uppercase tracking-widest text-red-400/80 hover:text-red-300 hover:bg-red-500/10 rounded-[1.8rem] transition-all group"
                 >
-                  <span className="text-lg">🚪</span>
-                  Logout
+                  <div className="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-400/20 group-hover:scale-110 group-hover:-rotate-3 transition-all">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.6)]"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  </div>
+                  Logout Session
                 </button>
               </div>
             )}
@@ -94,86 +101,79 @@ const Sidebar = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="relative bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3 py-3 px-4 mt-5 focus-within:bg-white/10 focus-within:border-white/20 transition-all">
+        <div className="relative bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3 py-3 px-4 mt-5 focus-within:bg-white/10 focus-within:border-white/20 transition-all shadow-xl">
           <img src={assets.search_icon} alt="search" className="w-4 opacity-40" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             type="text"
-            className="bg-transparent border-none outline-none text-white text-sm placeholder:text-white/40 flex-1"
+            className="bg-transparent border-none outline-none text-white text-sm placeholder:text-white/30 flex-1 font-medium"
             placeholder="Search contacts..."
           />
-          {search && (
-            <button 
-              onClick={() => setSearch("")}
-              className="text-white/40 hover:text-white transition-colors"
-            >
-              ✕
-            </button>
-          )}
+          {search && <button onClick={() => setSearch("")} className="text-white/40 hover:text-white transition-colors">✕</button>}
         </div>
 
         {/* Separator Line */}
-        <div className="h-[1px] bg-white/10 mx-2 mt-4" />
+        <div className="h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent mt-4" />
 
         {/* Special Functionality: Online Filter */}
         <div className="flex items-center justify-between px-1 mt-6 mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Contacts</span>
-            <span className="text-[9px] bg-white/5 border border-white/5 px-1.5 py-0.5 rounded text-white/30">{filteredUsers.length}</span>
+            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Live Contacts</span>
+            <span className="text-[9px] bg-violet-500/20 border border-violet-500/20 px-2 py-0.5 rounded-full text-violet-300 font-bold">{filteredUsers.length}</span>
           </div>
           
           <label className="flex items-center gap-2 cursor-pointer group">
-            <span className="text-[10px] text-white/30 group-hover:text-white/50 transition-colors">Online only</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/30 group-hover:text-white/50 transition-colors">Online Only</span>
             <div className="relative">
-              <input 
-                type="checkbox" 
-                className="sr-only peer" 
-                checked={showOnlineOnly}
-                onChange={(e) => setShowOnlineOnly(e.target.checked)}
-              />
-              <div className="w-7 h-4 bg-white/10 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/40 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-green-500/40 peer-checked:after:bg-white"></div>
+              <input type="checkbox" className="sr-only peer" checked={showOnlineOnly} onChange={(e) => setShowOnlineOnly(e.target.checked)} />
+              <div className="w-8 h-4.5 bg-white/10 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2.5px] after:left-[2.5px] after:bg-white/40 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-green-500/50 peer-checked:after:bg-white"></div>
             </div>
           </label>
         </div>
       </div>
 
       {/* Users */}
-      <div className="flex flex-col gap-1 mt-2">
+      <div className="flex-1 overflow-y-auto px-3 md:px-4 flex flex-col gap-1.5 mt-2 custom-scrollbar">
         {filteredUsers.map((user) => (
           <div
             key={user._id}
-            onClick={() => {
-              setSelectedUser(user);
-              setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 }));
-            }}
-            className={`group relative flex items-center gap-2.5 md:gap-3 p-2.5 md:p-3 rounded-2xl cursor-pointer transition-all duration-300 
+            onClick={() => { setSelectedUser(user); setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 })); }}
+            className={`group relative flex items-center gap-2.5 md:gap-3 p-3.5 rounded-[1.8rem] cursor-pointer transition-all duration-500 
               ${selectedUser?._id === user._id 
-                ? "bg-white/10 border border-white/10 shadow-lg" 
-                : "hover:bg-white/5 border border-transparent hover:border-white/5"}`}
+                ? "bg-violet-600/10 border border-violet-500/20 shadow-[0_15px_40px_rgba(139,92,246,0.15)] ring-1 ring-violet-500/20" 
+                : "hover:bg-white/5 border border-transparent hover:border-white/10"}`}
           >
-            <div className="relative">
+            {selectedUser?._id === user._id && (
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-violet-500 rounded-r-full shadow-[0_0_15px_rgba(139,92,246,0.8)]"></div>
+            )}
+
+            <div className="relative shrink-0">
+              <div className={`absolute -inset-1 rounded-full bg-violet-500/20 blur-md transition-opacity duration-500 ${selectedUser?._id === user._id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}></div>
               <img
                 src={user.profilePic || assets.avatar_icon}
                 alt=""
-                className="w-11 h-11 rounded-full object-cover border border-white/10 shadow-md group-hover:scale-105 transition-transform"
+                className={`relative w-12 h-12 rounded-full object-cover border-2 transition-all duration-500
+                  ${selectedUser?._id === user._id ? "border-violet-500/50 scale-105" : "border-white/10"}`}
               />
               {onlineUsers.includes(user._id) && (
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#121212] rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
+                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 border-2 border-[#0b0a1a] rounded-full shadow-[0_0_12px_rgba(74,222,128,0.7)] z-10"></span>
               )}
             </div>
 
             <div className="flex flex-col flex-1 min-w-0">
-              <div className="flex justify-between items-center">
-                <p className="font-semibold text-white truncate">{user.fullName}</p>
+              <div className="flex justify-between items-start">
+                <p className={`font-black text-[14px] tracking-tight transition-colors duration-300 ${selectedUser?._id === user._id ? "text-white" : "text-white/80 group-hover:text-white"}`}>
+                  {user.fullName}
+                </p>
                 {unseenMessages[user._id] > 0 && (
-                  <span className="bg-violet-600 text-[10px] font-bold text-white px-1.5 py-0.5 rounded-full animate-pop">
+                  <span className="bg-gradient-to-tr from-violet-500 to-indigo-600 text-[10px] font-black text-white px-2.5 py-1 rounded-full shadow-xl shadow-violet-900/40 animate-pop border border-white/20">
                     {unseenMessages[user._id]}
                   </span>
                 )}
               </div>
-              <p className={`text-xs truncate ${onlineUsers.includes(user._id) ? "text-green-400/70" : "text-white/30"}`}>
-                {onlineUsers.includes(user._id) ? "Active now" : "Offline"}
+              <p className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 mt-1 ${onlineUsers.includes(user._id) ? "text-green-300/80" : "text-white/20"}`}>
+                {onlineUsers.includes(user._id) ? "Live Now" : "Offline"}
               </p>
             </div>
           </div>

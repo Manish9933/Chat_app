@@ -69,20 +69,17 @@ export const updateProfile = async (req, res) => {
   try {
     const { fullName, bio, profilePic } = req.body;
 
-    let pic = undefined;
-
+    const updateData = {};
+    if (fullName) updateData.fullName = fullName;
+    if (bio !== undefined) updateData.bio = bio; // Allow empty bio string
     if (profilePic) {
       const uploaded = await cloudinary.uploader.upload(profilePic);
-      pic = uploaded.secure_url;
+      updateData.profilePic = uploaded.secure_url;
     }
 
     const updated = await User.findByIdAndUpdate(
       req.user._id,
-      {
-        fullName,
-        bio,
-        ...(pic && { profilePic: pic })
-      },
+      updateData,
       { new: true }
     ).select("-password");
 
