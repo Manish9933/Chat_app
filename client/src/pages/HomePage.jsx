@@ -39,7 +39,7 @@ const HomePage = () => {
         </div>
 
         {selectedUser && (
-          <div className="max-xl:hidden">
+          <div className="hidden xl:block h-full border-l border-white/5">
             <RightSidebar />
           </div>
         )}

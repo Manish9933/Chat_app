@@ -107,13 +107,13 @@ const ChatContainer = () => {
   return (
     <div className="w-full h-full overflow-hidden flex flex-col relative backdrop-blur-md bg-white/5">
       {/* HEADER */}
-      <div className="flex items-center gap-2 py-2 md:py-3 px-3 md:px-4 border-b border-white/5">
+      <div className="flex items-center gap-2 py-3 px-4 border-b border-white/5 bg-black/20 backdrop-blur-xl">
         {/* Back Button for Mobile */}
         <button
           onClick={() => setSelectedUser(null)}
-          className="p-2 -ml-2 hover:bg-white/5 rounded-full transition-colors md:hidden"
+          className="flex items-center justify-center w-10 h-10 -ml-2 hover:bg-white/5 rounded-full transition-colors md:hidden"
         >
-          <img src={assets.arrow_icon} className="w-5 opacity-70" alt="back" />
+          <img src={assets.arrow_icon} className="w-5 opacity-80" alt="back" />
         </button>
 
         <img
@@ -122,15 +122,15 @@ const ChatContainer = () => {
           alt=""
         />
 
-        <div className="flex-1 min-w-0">
-          <p className="text-base md:text-lg text-white font-medium truncate">
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <p className="text-base md:text-lg text-white font-semibold truncate leading-tight">
             {selectedUser?.fullName || "Chat"}
           </p>
-          <p className="text-[10px] md:text-xs">
+          <p className="text-[11px] md:text-xs leading-tight mt-0.5">
             {typingUsers?.[selectedUser?._id] ? (
               <span className="text-green-400 animate-pulse font-medium">typing...</span>
             ) : (
-              <span className={onlineUsers?.includes(selectedUser?._id) ? "text-green-500/70" : "text-white/30"}>
+              <span className={onlineUsers?.includes(selectedUser?._id) ? "text-green-400 font-medium" : "text-white/40"}>
                 {onlineUsers?.includes(selectedUser?._id) ? "Online" : "Offline"}
               </span>
             )}
@@ -140,16 +140,16 @@ const ChatContainer = () => {
         <div className="flex items-center gap-1">
           <button 
             onClick={() => startAudioCall(selectedUser)}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-colors"
           >
-            <img src={assets.call_icon} className="w-5 opacity-70" alt="call" />
+            <img src={assets.call_icon} className="w-5 opacity-80" alt="call" />
           </button>
           
           <button 
             onClick={() => startVideoCall(selectedUser)}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-colors"
           >
-            <img src={assets.video_icon} className="w-6 opacity-70" alt="video" />
+            <img src={assets.video_icon} className="w-6 opacity-80" alt="video" />
           </button>
         </div>
       </div>
@@ -162,124 +162,88 @@ const ChatContainer = () => {
           return (
             <div
               key={msg._id}
-              className={`flex items-end gap-2 ${isMe ? "flex-row" : "flex-row-reverse"} ${isMe ? "justify-end" : "justify-start"}`}
+              className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"}`}
             >
-              <div className="flex flex-col max-w-[85%] md:max-w-[75%]">
-                {/* ✅ SENDER NAME */}
-                <p className={`text-[10px] text-gray-500 mb-1 px-2 ${isMe ? "text-right" : "text-left"}`}>
-                  {isMe ? "You" : selectedUser?.fullName}
-                </p>
+              {!isMe && (
+                <img
+                  src={selectedUser?.profilePic || assets.avatar_icon}
+                  className="w-7 h-7 rounded-full object-cover border border-white/10 mb-5"
+                  alt=""
+                />
+              )}
 
+              <div className={`flex flex-col max-w-[80%] md:max-w-[70%] ${isMe ? "items-end" : "items-start"}`}>
                 {/* ✅ MEDIA RENDERING */}
                 {(msg.file || msg.image) && (
-                  <div className="mb-2 min-h-[150px] min-w-[200px] flex items-center justify-center bg-white/5 rounded-2xl overflow-hidden border border-white/10">
-                    {/* VIDEO HANDLING */}
+                  <div className="mb-1 rounded-2xl overflow-hidden border border-white/5">
+                    {/* VIDEO/FILE/IMAGE logic remains same but with tighter margins */}
                     {msg.fileType === "video" ? (
-                      <video
-                        src={msg.file}
-                        controls
-                        className="w-full max-h-[300px] object-cover"
-                      />
+                      <video src={msg.file} controls className="max-w-full max-h-[300px] object-cover" />
                     ) : msg.fileType === "file" ? (
-                      /* DOCUMENT HANDLING */
-                      <a
-                        href={msg.file}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-3 p-4 w-full h-full hover:bg-white/5 transition-all group"
-                      >
-                        <div className="w-12 h-12 bg-violet-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <span className="text-2xl">📄</span>
-                        </div>
-                        <div className="flex flex-col overflow-hidden">
-                          <span className="text-xs font-semibold text-white truncate max-w-[150px]">
-                            Attachment
-                          </span>
-                          <span className="text-[10px] text-white/40 uppercase tracking-tighter">Click to view document</span>
-                        </div>
+                      <a href={msg.file} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-white/5">
+                         <span className="text-xl">📄</span>
+                         <span className="text-xs text-white/60 truncate max-w-[120px]">Document</span>
                       </a>
                     ) : (
-                      /* IMAGE HANDLING (Default Fallback) */
                       <img
                         src={msg.file || msg.image}
-                        className="w-full max-h-[400px] object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                        className="max-w-full max-h-[400px] object-cover cursor-pointer"
                         alt="shared"
-                        onLoad={(e) => e.target.parentElement.classList.remove('min-h-[150px]', 'bg-white/5')}
                         onClick={() => window.open(msg.file || msg.image, "_blank")}
-                        onError={(e) => e.target.src = "https://via.placeholder.com/150?text=Error+Loading+Image"}
                       />
                     )}
                   </div>
                 )}
 
-                {/* ✅ TEXT RENDERING */}
+                {/* ✅ TEXT RENDERING (Instagram Style) */}
                 {msg.text && (
                   <div
-                    className={`p-2.5 md:p-3 text-[13px] md:text-sm font-light rounded-2xl break-words shadow-xl ${
+                    className={`px-4 py-2.5 text-[14px] leading-relaxed rounded-[20px] break-words ${
                       isMe
-                        ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white rounded-br-none shadow-indigo-500/20"
-                        : "bg-white/10 text-white rounded-bl-none border border-white/10"
+                        ? "bg-gradient-to-tr from-violet-600 to-indigo-500 text-white rounded-br-[4px]"
+                        : "bg-white/10 text-white rounded-bl-[4px]"
                     }`}
                   >
                     {msg.text}
                   </div>
                 )}
 
-                {/* ✅ WHATSAPP TICKS & TIME */}
-                <div className={`flex items-center gap-1 mt-1 px-1 ${isMe ? "justify-end" : "justify-start"}`}>
-                  <p className="text-[10px] text-white/30 tracking-tight">
-                    {msg.createdAt ? formatMessageTime(msg.createdAt) : "Just now"}
+                {/* ✅ TIME & STATUS */}
+                <div className={`flex items-center gap-1 mt-1 px-1 opacity-40`}>
+                  <p className="text-[9px]">
+                    {msg.createdAt ? formatMessageTime(msg.createdAt) : "now"}
                   </p>
-                  {isMe && (
-                    <div className="flex items-center">
-                      <span className={`text-[10px] ${msg.seen ? "text-blue-400" : "text-white/20"}`}>✓</span>
-                      <span className={`text-[10px] -ml-1 ${msg.seen ? "text-blue-400" : "text-white/20"}`}>✓</span>
-                    </div>
-                  )}
+                  {isMe && <span className="text-[10px]">{msg.seen ? "seen" : "✓"}</span>}
                 </div>
               </div>
-
-              <img
-                src={isMe ? (authUser?.profilePic || assets.avatar_icon) : (selectedUser?.profilePic || assets.avatar_icon)}
-                className="w-7 h-7 rounded-full object-cover shadow-md border border-white/10 mb-5"
-                alt=""
-              />
             </div>
           );
         })}
         <div ref={scrollRef}></div>
       </div>
 
-      {/* INPUT */}
-      <div className="p-2 md:p-4 bg-transparent">
-        <div className="flex items-center bg-white/10 backdrop-blur-3xl border border-white/10 p-1 md:p-2 px-3 md:px-4 rounded-2xl md:rounded-[1.5rem] shadow-xl focus-within:border-white/20 transition-all">
+      {/* INPUT (Instagram Pill) */}
+      <div className="p-3 bg-transparent">
+        <div className="flex items-center bg-white/5 border border-white/10 p-1 pl-4 rounded-full focus-within:border-white/20 transition-all shadow-2xl">
           <input
             value={input}
             onChange={handleInputChange}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage(e)}
-            placeholder="Type a message..."
-            className="flex-1 bg-transparent text-sm p-2 outline-none text-white placeholder-white/20"
+            placeholder="Message..."
+            className="flex-1 bg-transparent text-sm py-2.5 outline-none text-white placeholder-white/20"
           />
 
-          <input
-            type="file"
-            id="chat-file"
-            hidden
-            accept="image/*,video/*,.pdf,.doc,.docx"
-            onChange={handleSendFile}
-          />
-
-          <div className="flex items-center gap-4 ml-2">
-            <label htmlFor="chat-file" className="cursor-pointer hover:opacity-70 transition-opacity">
-              <img src={assets.gallery_icon} className="w-5" alt="attach" />
+          <div className="flex items-center gap-1 pr-1">
+            <label htmlFor="chat-file" className="w-9 h-9 flex items-center justify-center cursor-pointer hover:bg-white/5 rounded-full">
+              <img src={assets.gallery_icon} className="w-5 opacity-60" alt="attach" />
             </label>
 
             <button 
               onClick={handleSendMessage}
               disabled={!input.trim()}
-              className="p-2 bg-white rounded-xl hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="w-9 h-9 flex items-center justify-center text-violet-400 font-bold disabled:opacity-0 transition-all px-2"
             >
-              <img src={assets.send_button} className="w-5 invert" alt="send" />
+              Send
             </button>
           </div>
         </div>

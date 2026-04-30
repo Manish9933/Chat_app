@@ -31,29 +31,30 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center sm:p-4">
-      <div className="relative w-full h-full sm:h-auto max-w-md bg-white/5 backdrop-blur-3xl p-8 sm:p-10 sm:rounded-[2rem] sm:border border-white/10 shadow-2xl shadow-black/50 animate-pop overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col bg-black/20 backdrop-blur-3xl sm:items-center sm:justify-center sm:p-4">
+      <div className="relative w-full flex-1 sm:flex-none sm:h-auto sm:max-w-md bg-white/5 p-6 sm:p-10 sm:rounded-[2rem] sm:border border-white/10 shadow-2xl shadow-black/50 animate-pop overflow-hidden flex flex-col">
         
         {/* Decorative background glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-violet-600/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-600/20 rounded-full blur-3xl"></div>
 
-        {/* 🔙 BACK ARROW */}
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white/70"
-          title="Go Back"
-        >
-          <img
-            src={assets.arrow_icon}
-            className="w-5"
-            alt="Back"
-          />
-        </button>
-
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white">Profile Settings</h2>
-          <p className="text-white/40 text-sm mt-1">Update your personal information</p>
+        {/* 🔙 HEADER WITH BACK BUTTON */}
+        <div className="flex items-center mb-8 relative z-20">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white/70 mr-4"
+            title="Go Back"
+          >
+            <img
+              src={assets.arrow_icon}
+              className="w-5"
+              alt="Back"
+            />
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-white">Profile Settings</h2>
+            <p className="text-white/40 text-xs mt-0.5">Update your personal information</p>
+          </div>
         </div>
 
         <div className="flex flex-col items-center mb-8">
