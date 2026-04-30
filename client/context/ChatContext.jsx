@@ -11,6 +11,7 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [unseenMessages, setUnseenMessages] = useState({});
+  const [typingUsers, setTypingUsers] = useState({}); // { userId: boolean }
 
   // ---------------- SIDE USERS LIST ----------------
   const getUsers = async () => {
@@ -46,23 +47,25 @@ export const ChatProvider = ({ children }) => {
       // Create message object with proper structure
       const messageData = {
         text: msgBody.text || "",
-        ...(msgBody.image && { image: msgBody.image }),
+        file: msgBody.file || null,
+        fileType: msgBody.fileType || "text",
         createdAt: new Date().toISOString(),
       };
+
+      console.log(`Sending message: ${messageData.text.length} chars text, ${messageData.file?.length || 0} chars file`);
 
       const { data } = await axios.post(`/api/messages/send/${selectedUser._id}`, messageData);
 
       if (data.success) {
-        // Add the new message to local state
+        // Use the EXACT data from server to ensure URLs are correct
         const newMessage = {
           ...data.newMessage,
-          senderId: authUser._id,
-          createdAt: new Date().toISOString(),
+          senderId: authUser._id, // Keep local sender ID for consistency
         };
         
         setMessages((prev) => [...prev, newMessage]);
         
-        // Emit socket event for real-time update
+        // Emit socket event with the FULL server-verified message
         if (socket) {
           socket.emit("sendMessage", {
             receiverId: selectedUser._id,
@@ -99,13 +102,41 @@ export const ChatProvider = ({ children }) => {
 
     // Listen for new messages
     socket.on("receiveMessage", receiveMessage);
-    
-    // Also listen for the newMessage event (for backward compatibility)
     socket.on("newMessage", receiveMessage);
+
+    // Listen for profile updates
+    socket.on("profileUpdated", (updatedUser) => {
+      setUsers((prev) =>
+        prev.map((u) => (u._id === updatedUser._id ? updatedUser : u))
+      );
+      if (selectedUser?._id === updatedUser._id) {
+        setSelectedUser(updatedUser);
+      }
+    });
+
+    // Listen for messages seen
+    socket.on("messagesSeen", ({ by }) => {
+      if (selectedUser?._id === by) {
+        setMessages((prev) =>
+          prev.map((m) => (m.receiverId === by ? { ...m, seen: true } : m))
+        );
+      }
+    });
+
+    // Listen for typing events
+    socket.on("userTyping", ({ userId }) => {
+      setTypingUsers((prev) => ({ ...prev, [userId]: true }));
+    });
+
+    socket.on("userStopTyping", ({ userId }) => {
+      setTypingUsers((prev) => ({ ...prev, [userId]: false }));
+    });
 
     return () => {
       socket.off("receiveMessage", receiveMessage);
       socket.off("newMessage", receiveMessage);
+      socket.off("profileUpdated");
+      socket.off("messagesSeen");
     };
   }, [socket, selectedUser, authUser]);
 
@@ -140,6 +171,7 @@ export const ChatProvider = ({ children }) => {
         setSelectedUser,
         setUnseenMessages,
         setMessages,
+        typingUsers,
       }}
     >
       {children}

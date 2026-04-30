@@ -15,22 +15,19 @@ const HomePage = () => {
   const { selectedUser } = useContext(ChatContext);
 
   return (
-    <div className="top-10 bottom-10 w-full h-screen sm:px-[15%] sm:py-[5%]">
+    <div className="top-10 bottom-10 w-full h-screen sm:px-[10%] sm:py-[5%]">
       <div
-        className={`backdrop-blur-xl border-2 border-gray-600 rounded-2xl overflow-hidden h-full grid grid-cols-1 relarive
+        className={`backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden h-full grid relative shadow-2xl shadow-black/50
         ${
           selectedUser
-            ? "md:grid-cols-[1fr_1.5fr_1fr] xl:grid-cols-[1fr_2fr_1fr]"
-            : "md:grid-cols-2"
+            ? "grid-cols-1 md:grid-cols-[1fr_1.5fr_1fr] xl:grid-cols-[1fr_2fr_1fr]"
+            : "grid-cols-1 md:grid-cols-[1fr_2fr]"
         }`}
       >
         <Sidebar />
         <ChatContainer />
-        <RightSidebar />
-        <CallPopup />
-        <VideoCall />
+        {selectedUser && <RightSidebar />}
         <CallUI />
-
       </div>
     </div>
   );

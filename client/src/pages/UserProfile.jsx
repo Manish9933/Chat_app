@@ -1,14 +1,48 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState, useEffect } from "react";
 import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../context/AuthContext";
 import assets from "../assets/assets";
 
 const UserProfile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { selectedUser, messages } = useContext(ChatContext);
+  const { selectedUser, messages, getMessages, setSelectedUser } = useContext(ChatContext);
+  const { axios } = useContext(AuthContext);
 
-  if (!selectedUser || selectedUser._id !== userId) {
+  const [loading, setLoading] = useState(!selectedUser || selectedUser._id !== userId);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await axios.get(`/api/auth/user/${userId}`);
+        if (data.success) {
+          setSelectedUser(data.user);
+          getMessages(userId);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!selectedUser || selectedUser._id !== userId) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
+  }, [userId, axios, setSelectedUser, getMessages]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!selectedUser) {
     return (
       <div className="flex items-center justify-center h-screen text-white">
         User not found

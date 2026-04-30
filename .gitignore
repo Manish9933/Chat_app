@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment Variables (CRITICAL: Never upload these to GitHub)
+.env
+server/.env
+
+# Build folders
+dist/
+build/
+
+# OS and IDE files
+.DS_Store
+.vscode/
+.idea/
+npm-debug.log*
