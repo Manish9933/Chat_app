@@ -28,23 +28,30 @@ app.use(express.urlencoded({ limit: "70mb", extended: true }));
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  "http://localhost:3000"
+  "http://localhost:3000",
+  "https://chat-app-roan-eta.vercel.app" // Your main production URL
 ];
 
 if (process.env.CLIENT_URL) {
-  // Add both versions (with and without slash) to be safe
   const clientUrl = process.env.CLIENT_URL.replace(/\/$/, "");
-  allowedOrigins.push(clientUrl);
-  allowedOrigins.push(`${clientUrl}/`);
+  if (!allowedOrigins.includes(clientUrl)) allowedOrigins.push(clientUrl);
 }
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+    // 1. Allow if no origin (like mobile apps or curl)
+    // 2. Allow if in the allowed list
+    // 3. Allow ANY Vercel preview URL (ends with .vercel.app)
+    // 4. Allow all in development
+    if (
+      !origin || 
+      allowedOrigins.includes(origin) || 
+      origin.endsWith(".vercel.app") || 
+      process.env.NODE_ENV !== "production"
+    ) {
       callback(null, true);
     } else {
-      console.log("Blocked by CORS. Origin:", origin);
-      console.log("Allowed Origins:", allowedOrigins);
+      console.log("CORS Blocked for:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
