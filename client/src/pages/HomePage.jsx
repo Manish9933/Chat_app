@@ -26,8 +26,9 @@ const HomePage = () => {
       >
         <Sidebar />
         
-        {/* Hide ChatContainer on mobile if no user is selected to avoid stacking */}
-        <div className={`${!selectedUser ? "max-md:hidden" : "w-full h-full"}`}>
+        {/* On mobile, ONLY show the Sidebar if no user is selected. 
+            On desktop, always show the Chat area (Welcome screen). */}
+        <div className={`h-full ${!selectedUser ? "hidden md:flex" : "flex"}`}>
           <ChatContainer />
         </div>
 

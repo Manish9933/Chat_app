@@ -107,7 +107,7 @@ const ChatContainer = () => {
   return (
     <div className="h-full overflow-hidden flex flex-col relative backdrop-blur-md bg-white/5">
       {/* HEADER */}
-      <div className="flex items-center gap-2 py-3 px-4 border-b border-white/5">
+      <div className="flex items-center gap-2 py-2 md:py-3 px-3 md:px-4 border-b border-white/5">
         {/* Back Button for Mobile */}
         <button
           onClick={() => setSelectedUser(null)}
