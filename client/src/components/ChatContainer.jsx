@@ -86,7 +86,7 @@ const ChatContainer = () => {
           Select a conversation from the sidebar to start messaging your friends in real-time.
         </p>
         
-        <div className="grid grid-cols-2 gap-4 max-w-md w-full">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 max-w-md w-full">
           <div className="p-4 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm text-left">
             <span className="text-xl mb-2 block">💬</span>
             <p className="text-white font-medium text-sm">Instant Messaging</p>
@@ -99,7 +99,7 @@ const ChatContainer = () => {
           </div>
         </div>
         
-        <p className="mt-12 text-xs text-white/20 uppercase tracking-[0.2em]">Secure • Encrypted • Fast</p>
+        <p className="mt-12 text-xs text-white/20 uppercase tracking-[0.2em] hidden sm:block">Secure • Encrypted • Fast</p>
       </div>
     );
   }

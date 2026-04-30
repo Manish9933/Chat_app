@@ -15,31 +15,39 @@ const HomePage = () => {
   const { selectedUser } = useContext(ChatContext);
 
   return (
-    <div className="w-full h-[100dvh] sm:px-[2%] sm:py-[1%] lg:px-[5%] lg:py-[3%] xl:px-[10%] xl:py-[5%] flex flex-col">
+    <div className="w-full h-[100dvh] sm:p-2 md:p-4 lg:p-8 xl:p-12 flex flex-col bg-black/10 sm:bg-transparent">
       <div
-        className={`w-full backdrop-blur-2xl bg-white/5 border-white/10 sm:border sm:rounded-[2.5rem] overflow-hidden flex-1 grid relative shadow-2xl shadow-black/50
+        className={`w-full h-full flex-1 relative overflow-hidden flex
         ${
           selectedUser
-            ? "grid-cols-1 md:grid-cols-[350px_1fr] xl:grid-cols-[350px_1fr_300px]"
-            : "grid-cols-1 md:grid-cols-[350px_1fr]"
+            ? "sm:bg-white/5 sm:backdrop-blur-2xl sm:border sm:border-white/10 sm:rounded-[2.5rem] sm:shadow-2xl sm:shadow-black/50"
+            : "sm:bg-white/5 sm:backdrop-blur-2xl sm:border sm:border-white/10 sm:rounded-[2.5rem] sm:shadow-2xl sm:shadow-black/50"
         }`}
       >
+        {/* SIDEBAR: Always rendered, but hidden on mobile when a user is selected */}
         <Sidebar />
         
-        {/* MOBILE VIEW: Only show ChatContainer if a user is selected */}
+        {/* Animated Glowing Blobs - Desktop Only */}
+        <div className="hidden sm:block absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+        <div className="hidden sm:block absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+        <div className="hidden sm:block absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+        <div className="hidden sm:block absolute -bottom-8 right-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+        
+        {/* MOBILE CHAT VIEW: Absolute overlay with slide-in animation */}
         {selectedUser && (
-          <div className="flex w-full h-full md:hidden absolute inset-0 z-50 animate-slide-in">
+          <div className="fixed inset-0 z-[100] md:hidden animate-slide-in bg-[#030014]">
             <ChatContainer />
           </div>
         )}
 
-        {/* DESKTOP VIEW: Always show ChatContainer (shows Welcome screen if no user selected) */}
-        <div className="hidden md:flex h-full w-full">
+        {/* DESKTOP CHAT VIEW: Grid part */}
+        <div className="hidden md:flex flex-1 min-w-0 border-l border-white/5">
           <ChatContainer />
         </div>
 
+        {/* DESKTOP RIGHT SIDEBAR */}
         {selectedUser && (
-          <div className="hidden xl:block h-full border-l border-white/5">
+          <div className="hidden xl:block w-[300px] h-full border-l border-white/5 bg-black/10">
             <RightSidebar />
           </div>
         )}
