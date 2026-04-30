@@ -25,12 +25,26 @@ const server = http.createServer(app);
 // MIDDLEWARE
 app.use(express.json({ limit: "70mb" }));
 app.use(express.urlencoded({ limit: "70mb", extended: true }));
-const allowedOrigins = process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000"
+];
+
+if (process.env.CLIENT_URL) {
+  // Add both versions (with and without slash) to be safe
+  const clientUrl = process.env.CLIENT_URL.replace(/\/$/, "");
+  allowedOrigins.push(clientUrl);
+  allowedOrigins.push(`${clientUrl}/`);
+}
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
       callback(null, true);
     } else {
+      console.log("Blocked by CORS. Origin:", origin);
+      console.log("Allowed Origins:", allowedOrigins);
       callback(new Error("Not allowed by CORS"));
     }
   },
