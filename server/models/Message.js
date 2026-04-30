@@ -6,7 +6,9 @@ const msgSchema = new mongoose.Schema(
     receiverId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     text: String,
     file: String,
-    fileType: { type: String, enum: ["image", "video", "file", "text"], default: "text" },
+    fileName: String,
+    fileType: { type: String, enum: ["text", "image", "video", "audio", "file", "document", "poll", "location"], default: "text" },
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
     seen: { type: Boolean, default: false },
   },
   { timestamps: true }

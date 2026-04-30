@@ -13,6 +13,8 @@ import { AuthContext } from "../context/AuthContext.jsx";
 import CallUI from "./components/call/CallUI"; 
 import CallPopup from "./components/call/CallPopup"// ✅ FIXED IMPORT
 
+import SettingsPage from "./pages/SettingsPage";
+
 const App = () => {
   const { authUser } = useContext(AuthContext);
 
@@ -45,6 +47,11 @@ const App = () => {
           <Route
             path="/profile"
             element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/settings"
+            element={authUser ? <SettingsPage /> : <Navigate to="/login" />}
           />
         </Routes>
       </div>
