@@ -49,25 +49,36 @@ export const sendMessage = async (req, res) => {
   try {
     const senderId = req.user._id;
     const receiverId = req.params.id;
-    const { text, image } = req.body;
-
-    let imgUrl = null;
-    if (image) {
-      const up = await cloudinary.uploader.upload(image);
-      imgUrl = up.secure_url;
+    const { text, file, image, fileType } = req.body;
+    const mediaContent = file || image;
+ 
+    let fileUrl = null;
+    if (mediaContent) {
+      try {
+        const up = await cloudinary.uploader.upload(mediaContent, {
+          resource_type: "auto",
+        });
+        fileUrl = up.secure_url;
+      } catch (uploadError) {
+        console.error("Cloudinary Upload Error:", uploadError);
+        throw new Error("Failed to upload media to Cloudinary");
+      }
     }
-
+ 
     const msg = await Message.create({
       senderId,
       receiverId,
       text,
-      image: imgUrl,
+      file: fileUrl,
+      fileType: fileType || (mediaContent ? (mediaContent.startsWith("data:video") ? "video" : "image") : "text"),
     });
-
+ 
+    console.log("DEBUG: Message Created ->", { id: msg._id, hasFile: !!msg.file, type: msg.fileType });
+ 
     // Send via websocket
     const receiverSocket = userSocketMap[receiverId];
     if (receiverSocket) io.to(receiverSocket).emit("newMessage", msg);
-
+ 
     res.json({ success: true, newMessage: msg });
   } catch (err) {
     res.json({ success: false, message: err.message });

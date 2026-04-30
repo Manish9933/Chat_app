@@ -91,3 +91,13 @@ export const updateProfile = async (req, res) => {
     res.json({ success: false, message: err.message });
   }
 };
+// GET USER BY ID
+export const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) return res.json({ success: false, message: "User not found" });
+    res.json({ success: true, user });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+};

@@ -30,94 +30,146 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center gap-8 backdrop-blur-2xl max-sm:flex-col">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl shadow-black/50 animate-pop">
+        
+        {/* Left Side: Branding & Info */}
+        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-r border-white/10">
+          <div>
+            <div className="flex items-center gap-3 mb-10">
+              <img src={assets.logo} className="w-48 object-contain" alt="QuickChat Logo" />
+            </div>
+            
+            <h2 className="text-5xl font-extrabold text-white leading-tight mb-6">
+              Connect with the <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
+                Future of Chat.
+              </span>
+            </h2>
+            <p className="text-lg text-white/60 max-w-md leading-relaxed">
+              Experience lightning-fast communication with our premium real-time messaging platform. Secure, sleek, and built for you.
+            </p>
+          </div>
 
-      <img src={assets.logo} className="w-[min(30vw,250px)]" />
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md">
+              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xl">✓</div>
+              <div>
+                <p className="text-white font-medium">Real-time Video Calls</p>
+                <p className="text-white/40 text-sm">Crystal clear audio and video sync.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md">
+              <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-xl">🔒</div>
+              <div>
+                <p className="text-white font-medium">End-to-End Privacy</p>
+                <p className="text-white/40 text-sm">Your conversations are always secure.</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="border-2 bg-white/10 p-6 rounded-lg text-white w-[320px] flex flex-col gap-6"
-      >
-        <h2 className="text-2xl font-medium">{state}</h2>
+        {/* Right Side: Form */}
+        <div className="p-8 lg:p-16 flex flex-col justify-center">
+          {/* Logo for Mobile */}
+          <div className="lg:hidden flex justify-center mb-8">
+            <img src={assets.logo} className="w-40 object-contain" alt="Logo" />
+          </div>
 
-        {!step2 && state === "Sign up" && (
-          <input
-            className="p-2 rounded bg-gray-900 border"
-            placeholder="Full Name"
-            required
-            autoComplete="full name"
-            onChange={(e) => setFullName(e.target.value)}
-          />
-        )}
+          <div className="mb-10 text-center lg:text-left">
+            <h3 className="text-3xl font-bold text-white mb-2">
+              {state === "Sign up" ? "Create Account" : "Welcome Back"}
+            </h3>
+            <p className="text-white/50">
+              {state === "Sign up" 
+                ? "Join our community and start chatting today." 
+                : "Please enter your details to sign in."}
+            </p>
+          </div>
 
-        {!step2 && (
-          <>
-            <input
-              className="p-2 rounded bg-gray-900 border"
-              placeholder="Email"
-              type="email"
-              required
-              autoComplete="email"
-              onChange={(e) => setEmail(e.target.value)}
-            />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {state === "Sign up" && !step2 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white/70 ml-1">Full Name</label>
+                <input
+                  className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:border-violet-500/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                  placeholder="John Doe"
+                  required
+                  autoComplete="name"
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+            )}
 
-            <input
-              className="p-2 rounded bg-gray-900 border"
-              placeholder="Password"
-              type="password"
-              required
-              autoComplete="current-password"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </>
-        )}
+            {!step2 && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/70 ml-1">Email Address</label>
+                  <input
+                    className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:border-violet-500/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                    placeholder="name@example.com"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
 
-        {state === "Sign up" && step2 && (
-          <textarea
-            className="p-2 rounded bg-gray-900 border"
-            rows="4"
-            placeholder="Enter bio..."
-            required
-            onChange={(e) => setBio(e.target.value)}
-          ></textarea>
-        )}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/70 ml-1">Password</label>
+                  <input
+                    className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:border-violet-500/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                    placeholder="••••••••"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
 
-        <button className="bg-gradient-to-r from-purple-400 to-violet-600 p-2 rounded">
-          {state === "Sign up" ? "Create Account" : "Login"}
-        </button>
+            {state === "Sign up" && step2 && (
+              <div className="space-y-2 animate-fade-in">
+                <label className="text-sm font-medium text-white/70 ml-1">About You</label>
+                <textarea
+                  className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:border-violet-500/50 focus:bg-white/10 transition-all placeholder:text-white/20 resize-none"
+                  rows="5"
+                  placeholder="Tell us a little about yourself..."
+                  required
+                  onChange={(e) => setBio(e.target.value)}
+                ></textarea>
+              </div>
+            )}
 
-        <p className="text-sm text-gray-300">
-          {state === "Sign up" ? (
-            <>
-              Already have account?
-              <span
-                className="text-violet-400 cursor-pointer"
+            <button className="w-full py-4 mt-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-violet-900/20 transform active:scale-[0.98] transition-all">
+              {state === "Sign up" 
+                ? (step2 ? "Complete Registration" : "Next Step") 
+                : "Sign In"}
+            </button>
+
+            <div className="flex items-center gap-4 my-8">
+              <div className="h-[1px] flex-1 bg-white/10"></div>
+              <span className="text-white/20 text-xs font-medium uppercase tracking-widest">Or continue with</span>
+              <div className="h-[1px] flex-1 bg-white/10"></div>
+            </div>
+
+            <p className="text-center text-white/40 text-sm">
+              {state === "Sign up" ? "Already have an account?" : "Don't have an account yet?"}
+              <button
+                type="button"
+                className="ml-2 text-violet-400 font-semibold hover:text-violet-300 transition-colors"
                 onClick={() => {
-                  setState("login");
+                  setState(state === "Sign up" ? "login" : "Sign up");
                   setStep2(false);
                 }}
               >
-                {" "}
-                Login
-              </span>
-            </>
-          ) : (
-            <>
-              Create new account?
-              <span
-                className="text-violet-400 cursor-pointer"
-                onClick={() => {
-                  setState("Sign up");
-                  setStep2(false);
-                }}
-              >
-                {" "}
-                Signup
-              </span>
-            </>
-          )}
-        </p>
-      </form>
+                {state === "Sign up" ? "Log in" : "Create one"}
+              </button>
+            </p>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

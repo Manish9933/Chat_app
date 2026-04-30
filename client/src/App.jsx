@@ -17,27 +17,37 @@ const App = () => {
   const { authUser } = useContext(AuthContext);
 
   return (
-    <div className="bg-[url('/bgImage.svg')] bg-cover min-h-screen">
-      <Toaster />
-      <video/>
-      
-      <CallPopup />
-      <Routes>
-        <Route
-          path="/"
-          element={authUser ? <HomePage /> : <Navigate to="/login" />}
-        />
-        <Route path="/profile/:userId" element={<UserProfile />} />
-        <Route
-          path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
-        />
+    <div className="relative min-h-screen w-full bg-mesh overflow-hidden">
+      {/* Noise Overlay */}
+      <div className="noise" />
 
-        <Route
-          path="/profile"
-          element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
-        />
-      </Routes>
+      {/* Animated Glowing Blobs */}
+      <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+      <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+      <div className="absolute -bottom-8 right-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+
+      <div className="relative z-10 min-h-screen">
+        <Toaster />
+        
+        <CallPopup />
+        <Routes>
+          <Route
+            path="/"
+            element={authUser ? <HomePage /> : <Navigate to="/login" />}
+          />
+          <Route path="/profile/:userId" element={<UserProfile />} />
+          <Route
+            path="/login"
+            element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+          />
+
+          <Route
+            path="/profile"
+            element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+          />
+        </Routes>
+      </div>
     </div>
   );
 };
