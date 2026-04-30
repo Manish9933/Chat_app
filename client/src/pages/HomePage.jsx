@@ -24,33 +24,32 @@ const HomePage = () => {
             : "sm:bg-white/5 sm:backdrop-blur-2xl sm:border sm:border-white/10 sm:rounded-[2.5rem] sm:shadow-2xl sm:shadow-black/50"
         }`}
       >
-        {/* SIDEBAR: Always rendered, but hidden on mobile when a user is selected */}
-        <Sidebar />
-        
-        {/* Animated Glowing Blobs - Desktop Only */}
-        <div className="hidden sm:block absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-        <div className="hidden sm:block absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-        <div className="hidden sm:block absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
-        <div className="hidden sm:block absolute -bottom-8 right-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-        
-        {/* MOBILE CHAT VIEW: Absolute overlay with slide-in animation */}
-        {selectedUser && (
-          <div className="fixed inset-0 z-[100] md:hidden animate-slide-in bg-[#030014]">
-            <ChatContainer />
-          </div>
-        )}
-
-        {/* DESKTOP CHAT VIEW: Grid part */}
-        <div className="hidden md:flex flex-1 min-w-0 border-l border-white/5">
-          <ChatContainer />
+        {/* DESKTOP VIEW: Sidebar + ChatContainer */}
+        <div className="hidden md:flex w-full h-full">
+           <Sidebar />
+           <div className="flex-1 min-w-0 border-l border-white/5">
+             <ChatContainer />
+           </div>
+           {selectedUser && (
+             <div className="hidden xl:block w-[300px] border-l border-white/5 bg-black/10">
+               <RightSidebar />
+             </div>
+           )}
         </div>
 
-        {/* DESKTOP RIGHT SIDEBAR */}
-        {selectedUser && (
-          <div className="hidden xl:block w-[300px] h-full border-l border-white/5 bg-black/10">
-            <RightSidebar />
-          </div>
-        )}
+        {/* MOBILE VIEW: Either Sidebar OR ChatContainer */}
+        <div className="flex md:hidden w-full h-full relative">
+           {!selectedUser ? (
+             <Sidebar />
+           ) : (
+             <div className="fixed inset-0 z-[100] animate-slide-in bg-transparent">
+               <div className="absolute inset-0 bg-white/5 backdrop-blur-2xl"></div>
+               <div className="relative h-full w-full">
+                 <ChatContainer />
+               </div>
+             </div>
+           )}
+        </div>
         
         <CallUI />
       </div>

@@ -15,7 +15,44 @@ const ChatContainer = () => {
 
   const scrollRef = useRef(null);
   const [input, setInput] = useState("");
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
   const typingTimeoutRef = useRef(null);
+
+  const emojis = ["😊", "😂", "🥰", "😍", "😒", "😭", "😘", "🔥", "✨", "🙌", "👍", "❤️", "✔️", "📍", "🤝", "🎉"];
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      let chunks = [];
+
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          sendMessage({ file: reader.result, fileType: "audio" });
+        };
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (err) {
+      toast.error("Microphone access denied");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
 
   // ---------------- TYPING LOGIC ----------------
   const handleInputChange = (e) => {
@@ -105,57 +142,68 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="w-full h-full overflow-hidden flex flex-col relative backdrop-blur-md bg-white/5">
+    <div className="w-full h-full overflow-hidden flex flex-col relative bg-transparent">
       {/* HEADER */}
-      <div className="flex items-center gap-3 py-3.5 px-4 border-b border-white/5 bg-black/30 backdrop-blur-2xl z-20">
+      <div className="flex items-center gap-3 py-3.5 px-4 border-b border-violet-500/10 bg-[#0b0a1a]/40 backdrop-blur-3xl z-20 shadow-2xl relative">
+        {/* Subtle top glow */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/20 to-transparent"></div>
+
         {/* Back Button for Mobile */}
         <button
           onClick={() => setSelectedUser(null)}
-          className="flex items-center justify-center w-10 h-10 -ml-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all md:hidden active:scale-90"
+          className="flex items-center justify-center w-10 h-10 -ml-1 bg-violet-600/10 hover:bg-violet-600/20 border border-violet-500/20 rounded-full transition-all md:hidden active:scale-90 shadow-lg shadow-violet-900/40"
         >
-          <img src={assets.arrow_icon} className="w-5 opacity-80" alt="back" />
+          <img src={assets.arrow_icon} className="w-5 opacity-100 brightness-150 drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" alt="back" />
         </button>
 
-        <img
-          src={selectedUser?.profilePic || assets.avatar_icon}
-          className="w-10 h-10 rounded-full object-cover border border-white/10"
-          alt=""
-        />
+        <div className="relative shrink-0">
+          <div className="absolute -inset-1 bg-violet-500/20 blur-md rounded-full"></div>
+          <img
+            src={selectedUser?.profilePic || assets.avatar_icon}
+            className="relative w-10 h-10 rounded-full object-cover border-2 border-white/20 shadow-xl"
+            alt=""
+          />
+          {onlineUsers?.includes(selectedUser?._id) && (
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#0b0a1a] rounded-full shadow-[0_0_10px_rgba(34,197,94,0.6)] z-10"></span>
+          )}
+        </div>
 
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <p className="text-base md:text-lg text-white font-semibold truncate leading-tight">
+        <div className="flex-1 min-w-0 flex flex-col justify-center ml-1">
+          <p className="text-base md:text-lg text-white font-bold truncate tracking-tight drop-shadow-sm">
             {selectedUser?.fullName || "Chat"}
           </p>
-          <p className="text-[11px] md:text-xs leading-tight mt-0.5">
+          <p className="text-[11px] md:text-xs leading-tight mt-0.5 font-bold">
             {typingUsers?.[selectedUser?._id] ? (
-              <span className="text-green-400 animate-pulse font-medium">typing...</span>
+              <span className="text-violet-400 animate-pulse uppercase tracking-wider">typing...</span>
             ) : (
-              <span className={onlineUsers?.includes(selectedUser?._id) ? "text-green-400 font-medium" : "text-white/40"}>
+              <span className={onlineUsers?.includes(selectedUser?._id) ? "text-green-400 uppercase tracking-widest text-[9px]" : "text-white/40 uppercase tracking-widest text-[9px]"}>
                 {onlineUsers?.includes(selectedUser?._id) ? "Online" : "Offline"}
               </span>
             )}
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2.5">
           <button 
             onClick={() => startAudioCall(selectedUser)}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 bg-white/5 border border-white/5 rounded-full transition-all active:scale-95"
+            className="w-10 h-10 flex items-center justify-center hover:bg-violet-600/30 bg-white/5 border border-white/10 rounded-full transition-all active:scale-95 shadow-lg group"
           >
-            <img src={assets.call_icon} className="w-5 opacity-80" alt="call" />
+            <img src={assets.call_icon} className="w-5 opacity-90 brightness-150 group-hover:scale-110 transition-transform" alt="call" />
           </button>
           
           <button 
             onClick={() => startVideoCall(selectedUser)}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 bg-white/5 border border-white/5 rounded-full transition-all active:scale-95"
+            className="w-10 h-10 flex items-center justify-center hover:bg-violet-600/30 bg-white/5 border border-white/10 rounded-full transition-all active:scale-95 shadow-lg group"
           >
-            <img src={assets.video_icon} className="w-6 opacity-80" alt="video" />
+            <img src={assets.video_icon} className="w-6 opacity-90 brightness-150 group-hover:scale-110 transition-transform" alt="video" />
           </button>
         </div>
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 relative">
+        <div className="absolute inset-0 bg-whatsapp pointer-events-none opacity-[0.05]"></div>
+        <div className="relative z-10 space-y-6 flex flex-col">
         {(messages || []).map((msg) => {
           const isMe = (msg.senderId === authUser?._id) || (msg.senderId?._id === authUser?._id);
 
@@ -220,34 +268,91 @@ const ChatContainer = () => {
           );
         })}
         <div ref={scrollRef}></div>
+        </div>
       </div>
 
-      {/* INPUT (Instagram Pill) */}
-      <div className="p-3 bg-transparent">
-        <div className="flex items-center bg-white/5 border border-white/10 p-1 pl-4 rounded-full focus-within:border-white/20 transition-all shadow-2xl">
+      {/* INPUT (WhatsApp Style, Sync with Theme) */}
+      <div className="p-1.5 md:p-3 bg-transparent flex items-end gap-1.5 md:gap-2 w-full max-w-full relative">
+        
+        {/* Emoji Picker Popup */}
+        {showEmoji && (
+          <div className="absolute bottom-full left-4 mb-2 p-2 bg-[#0b0a1a]/90 backdrop-blur-3xl border border-violet-500/20 rounded-2xl shadow-2xl grid grid-cols-4 gap-2 animate-pop z-50">
+            {emojis.map(e => (
+              <button 
+                key={e} 
+                onClick={() => { setInput(prev => prev + e); setShowEmoji(false); }}
+                className="text-xl p-2 hover:bg-white/5 rounded-lg transition-all"
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0 flex items-center bg-white/5 border border-white/10 p-0.5 pl-2 md:p-1 md:pl-3 rounded-[24px] focus-within:border-white/20 transition-all shadow-xl backdrop-blur-xl">
+          <button 
+            onClick={() => setShowEmoji(!showEmoji)}
+            className={`p-1.5 md:p-2 transition-colors shrink-0 ${showEmoji ? "text-violet-400" : "text-white/40 hover:text-violet-400"}`}
+          >
+            <span className="text-lg md:text-xl">😊</span>
+          </button>
+          
           <input
             value={input}
             onChange={handleInputChange}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage(e)}
-            placeholder="Message..."
-            className="flex-1 bg-transparent text-sm py-2.5 outline-none text-white placeholder-white/20"
+            placeholder={isRecording ? "Recording..." : "Message"}
+            disabled={isRecording}
+            className="flex-1 min-w-0 bg-transparent text-sm py-2.5 md:py-3 px-1 md:px-2 outline-none text-white placeholder-white/20"
           />
 
-          <div className="flex items-center gap-1 pr-1">
-            <label htmlFor="chat-file" className="w-9 h-9 flex items-center justify-center cursor-pointer hover:bg-white/5 rounded-full">
-              <img src={assets.gallery_icon} className="w-5 opacity-60" alt="attach" />
+          <div className="flex items-center gap-0.5 pr-1 shrink-0">
+            {/* Document Upload */}
+            <label htmlFor="doc-file" className="p-1.5 md:p-2 cursor-pointer text-white/40 hover:text-violet-400 transition-all" title="Document">
+               <span className="text-lg md:text-xl rotate-45 block">📎</span>
             </label>
-
-            <button 
-              onClick={handleSendMessage}
-              disabled={!input.trim()}
-              className="w-9 h-9 flex items-center justify-center text-violet-400 font-bold disabled:opacity-0 transition-all px-2"
-            >
-              Send
+            
+            <label htmlFor="chat-file" className="p-1.5 md:p-2 cursor-pointer text-white/40 hover:text-violet-400 transition-all" title="Gallery">
+              <img src={assets.gallery_icon} className="w-4.5 md:w-5 opacity-40" alt="attach" />
+            </label>
+            
+            <button className="p-1.5 md:p-2 text-white/40 hover:text-violet-400 transition-all" title="Camera">
+              <span className="text-lg md:text-xl">📷</span>
             </button>
           </div>
         </div>
+
+        {/* Circular Send/Mic Button */}
+        <button 
+          onClick={input.trim() ? handleSendMessage : (isRecording ? stopRecording : startRecording)}
+          className={`w-[48px] h-[48px] md:w-[52px] md:h-[52px] shrink-0 flex items-center justify-center rounded-full shadow-lg transition-all active:scale-90
+            ${input.trim() || isRecording
+              ? "bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-violet-600/40" 
+              : "bg-white/10 text-white/40 shadow-none hover:bg-white/20"}`}
+        >
+          {input.trim() ? (
+             <img src={assets.send_button} className="w-5 md:w-6 animate-pop" alt="send" />
+          ) : (
+             isRecording ? (
+               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+             ) : (
+               <img src={assets.mic_on_icon} className="w-5 md:w-6 opacity-60" alt="mic" />
+             )
+          )}
+        </button>
       </div>
+      
+      {/* Hidden file inputs */}
+      <input type="file" id="chat-file" accept="image/*,video/*" hidden onChange={handleSendFile} />
+      <input type="file" id="doc-file" accept=".pdf,.doc,.docx,.txt" hidden onChange={(e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+          sendMessage({ file: reader.result, fileType: "document", fileName: file.name });
+        };
+      }} />
     </div>
   );
 };

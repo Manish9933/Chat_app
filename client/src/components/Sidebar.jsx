@@ -41,8 +41,9 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`bg-white/5 backdrop-blur-md h-full px-5 py-4 md:px-6 md:py-6 text-white overflow-y-scroll border-r border-white/10
-        ${selectedUser ? "max-md:hidden" : "w-full"}`}
+      className={`h-full px-5 py-4 md:px-6 md:py-6 text-white overflow-y-scroll border-r border-white/10
+        ${selectedUser ? "max-md:hidden" : "w-full md:w-[350px] lg:w-[400px]"}
+        bg-white/5 backdrop-blur-md md:bg-transparent md:backdrop-blur-none shrink-0`}
     >
       {/* Header */}
       <div className="pb-5">
