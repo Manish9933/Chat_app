@@ -135,15 +135,6 @@ app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 app.get("/api/status", (req, res) => res.send("Server online ✔️"));
 
-// PRODUCTION CONFIG (Only serve static if directory exists)
-if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
-  app.use(express.static(path.join(__dirname, "../client/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
-  });
-}
-
 // GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error(err.stack);
