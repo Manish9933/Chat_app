@@ -6,7 +6,9 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.join(__dirname, ".env") });
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 
 import cors from "cors";
 import http from "http";
@@ -128,12 +130,13 @@ io.on("connection", (socket) => {
 });
 
 // ROUTES
+app.get("/", (req, res) => res.send("🚀 Chat App Backend is Running!"));
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 app.get("/api/status", (req, res) => res.send("Server online ✔️"));
 
-// PRODUCTION CONFIG
-if (process.env.NODE_ENV === "production") {
+// PRODUCTION CONFIG (Only serve static if directory exists)
+if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
   app.use(express.static(path.join(__dirname, "../client/dist")));
 
   app.get("*", (req, res) => {
