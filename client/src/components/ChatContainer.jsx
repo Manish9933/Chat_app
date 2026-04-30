@@ -107,7 +107,15 @@ const ChatContainer = () => {
   return (
     <div className="h-full overflow-hidden flex flex-col relative backdrop-blur-md bg-white/5">
       {/* HEADER */}
-      <div className="flex items-center gap-3 py-3 mx-4 border-b border-white/5">
+      <div className="flex items-center gap-2 py-3 px-4 border-b border-white/5">
+        {/* Back Button for Mobile */}
+        <button
+          onClick={() => setSelectedUser(null)}
+          className="p-2 -ml-2 hover:bg-white/5 rounded-full transition-colors md:hidden"
+        >
+          <img src={assets.arrow_icon} className="w-5 opacity-70" alt="back" />
+        </button>
+
         <img
           src={selectedUser?.profilePic || assets.avatar_icon}
           className="w-10 h-10 rounded-full object-cover border border-white/10"
@@ -115,10 +123,10 @@ const ChatContainer = () => {
         />
 
         <div className="flex-1 min-w-0">
-          <p className="text-lg text-white font-medium truncate">
+          <p className="text-base md:text-lg text-white font-medium truncate">
             {selectedUser?.fullName || "Chat"}
           </p>
-          <p className="text-xs">
+          <p className="text-[10px] md:text-xs">
             {typingUsers?.[selectedUser?._id] ? (
               <span className="text-green-400 animate-pulse font-medium">typing...</span>
             ) : (
@@ -129,26 +137,19 @@ const ChatContainer = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button 
             onClick={() => startAudioCall(selectedUser)}
             className="p-2 hover:bg-white/5 rounded-full transition-colors"
           >
-            <img src={assets.call_icon} className="w-5" alt="call" />
+            <img src={assets.call_icon} className="w-5 opacity-70" alt="call" />
           </button>
           
           <button 
             onClick={() => startVideoCall(selectedUser)}
             className="p-2 hover:bg-white/5 rounded-full transition-colors"
           >
-            <img src={assets.video_icon} className="w-6" alt="video" />
-          </button>
-
-          <button
-            onClick={() => setSelectedUser(null)}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors md:hidden"
-          >
-            <img src={assets.arrow_icon} className="w-6" alt="back" />
+            <img src={assets.video_icon} className="w-6 opacity-70" alt="video" />
           </button>
         </div>
       </div>

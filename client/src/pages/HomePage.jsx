@@ -15,7 +15,7 @@ const HomePage = () => {
   const { selectedUser } = useContext(ChatContext);
 
   return (
-    <div className="top-10 bottom-10 w-full h-screen sm:px-[10%] sm:py-[5%]">
+    <div className="w-full h-[100dvh] sm:px-[5%] sm:py-[2%] lg:px-[10%] lg:py-[5%]">
       <div
         className={`backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden h-full grid relative shadow-2xl shadow-black/50
         ${
@@ -25,8 +25,18 @@ const HomePage = () => {
         }`}
       >
         <Sidebar />
-        <ChatContainer />
-        {selectedUser && <RightSidebar />}
+        
+        {/* Hide ChatContainer on mobile if no user is selected to avoid stacking */}
+        <div className={`${!selectedUser ? "max-md:hidden" : "w-full h-full"}`}>
+          <ChatContainer />
+        </div>
+
+        {selectedUser && (
+          <div className="max-xl:hidden">
+            <RightSidebar />
+          </div>
+        )}
+        
         <CallUI />
       </div>
     </div>
