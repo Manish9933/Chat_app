@@ -164,7 +164,7 @@ const ChatContainer = () => {
               key={msg._id}
               className={`flex items-end gap-2 ${isMe ? "flex-row" : "flex-row-reverse"} ${isMe ? "justify-end" : "justify-start"}`}
             >
-              <div className="flex flex-col max-w-[75%]">
+              <div className="flex flex-col max-w-[85%] md:max-w-[75%]">
                 {/* ✅ SENDER NAME */}
                 <p className={`text-[10px] text-gray-500 mb-1 px-2 ${isMe ? "text-right" : "text-left"}`}>
                   {isMe ? "You" : selectedUser?.fullName}
@@ -215,7 +215,7 @@ const ChatContainer = () => {
                 {/* ✅ TEXT RENDERING */}
                 {msg.text && (
                   <div
-                    className={`p-3 md:text-sm font-light rounded-2xl break-words shadow-xl ${
+                    className={`p-2.5 md:p-3 text-[13px] md:text-sm font-light rounded-2xl break-words shadow-xl ${
                       isMe
                         ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white rounded-br-none shadow-indigo-500/20"
                         : "bg-white/10 text-white rounded-bl-none border border-white/10"
@@ -251,8 +251,8 @@ const ChatContainer = () => {
       </div>
 
       {/* INPUT */}
-      <div className="p-4 bg-transparent">
-        <div className="flex items-center bg-white/10 backdrop-blur-3xl border border-white/10 p-2 px-4 rounded-[1.5rem] shadow-xl focus-within:border-white/20 transition-all">
+      <div className="p-2 md:p-4 bg-transparent">
+        <div className="flex items-center bg-white/10 backdrop-blur-3xl border border-white/10 p-1 md:p-2 px-3 md:px-4 rounded-2xl md:rounded-[1.5rem] shadow-xl focus-within:border-white/20 transition-all">
           <input
             value={input}
             onChange={handleInputChange}

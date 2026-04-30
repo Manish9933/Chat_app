@@ -146,7 +146,7 @@ const Sidebar = () => {
               setSelectedUser(user);
               setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 }));
             }}
-            className={`group relative flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 
+            className={`group relative flex items-center gap-2.5 md:gap-3 p-2.5 md:p-3 rounded-2xl cursor-pointer transition-all duration-300 
               ${selectedUser?._id === user._id 
                 ? "bg-white/10 border border-white/10 shadow-lg" 
                 : "hover:bg-white/5 border border-transparent hover:border-white/5"}`}
