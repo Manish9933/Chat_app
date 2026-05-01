@@ -78,6 +78,75 @@ const ChatContainer = () => {
     closeCamera();
   };
 
+  // 🎙️ Speech Recognition Logic
+  const toggleListening = () => {
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return toast.error("Speech recognition not supported");
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (e) => {
+      let finalTranscript = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+      }
+      if (finalTranscript) setText(prev => prev + (prev ? " " : "") + finalTranscript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognition.start();
+  };
+
+  // 🎤 Audio Recording Logic
+  const audioRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+  const startRecordingAudio = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          sendMessage({ file: reader.result, fileType: "audio", fileName: "voice-message.webm" });
+          toast.success("Voice Message Sent!");
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+
+      recorder.start();
+      setIsRecordingAudio(true);
+    } catch (err) {
+      toast.error("Microphone access denied");
+    }
+  };
+
+  const stopRecordingAudio = () => {
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.stop();
+      setIsRecordingAudio(false);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!text.trim()) return;
     await sendMessage({ text: text.trim(), fileType: "text", replyTo: replyingTo?._id });
@@ -107,7 +176,7 @@ const ChatContainer = () => {
   const isPopOpen = showEmoji || showAttachments || isCameraOpen || showPollCreator;
 
   return (
-    <div className="w-full h-full overflow-hidden flex flex-col relative bg-transparent">
+    <div className="w-full h-full flex flex-col relative bg-transparent overflow-x-hidden">
       {/* 🌑 Dimmer */}
       {isPopOpen && <div className="absolute inset-0 bg-[#030014]/40 backdrop-blur-sm z-30 transition-all"></div>}
 
@@ -159,6 +228,7 @@ const ChatContainer = () => {
         openMenuId={openMenuId} 
         setOpenMenuId={setOpenMenuId} 
         isPopOpen={isPopOpen} 
+        setReplyingTo={setReplyingTo}
       />
 
       <ChatInput 
@@ -167,8 +237,8 @@ const ChatContainer = () => {
         handleSendFile={handleSendFile}
         showEmoji={showEmoji} setShowEmoji={setShowEmoji}
         showAttachments={showAttachments} setShowAttachments={setShowAttachments}
-        isListening={isListening} toggleListening={() => setIsListening(!isListening)}
-        isRecordingAudio={isRecordingAudio} startRecordingAudio={() => setIsRecordingAudio(true)} stopRecordingAudio={() => setIsRecordingAudio(false)}
+        isListening={isListening} toggleListening={toggleListening}
+        isRecordingAudio={isRecordingAudio} startRecordingAudio={startRecordingAudio} stopRecordingAudio={stopRecordingAudio}
         replyingTo={replyingTo} setReplyingTo={setReplyingTo}
         openCamera={openCamera} setShowPollCreator={setShowPollCreator}
         shareLocation={() => toast.success("Location Shared!")}

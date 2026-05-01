@@ -38,6 +38,9 @@ const RightSidebar = ({ isOpen, onClose, isMobile }) => {
     ? `fixed inset-0 z-[200] bg-[#1a1625]/95 backdrop-blur-[100px] flex flex-col transition-all duration-500 ${isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"}`
     : "hidden lg:flex flex-col w-[320px] xl:w-[380px] h-full bg-[#1a1625]/60 backdrop-blur-[80px] border-l border-white/10 animate-slide-left overflow-y-auto custom-scrollbar relative z-30";
 
+  const { onlineUsers } = useContext(AuthContext);
+  const isOnline = onlineUsers.includes(selectedUser?._id);
+
   return (
     <div className={containerClasses}>
       
@@ -55,13 +58,18 @@ const RightSidebar = ({ isOpen, onClose, isMobile }) => {
           <div className="absolute -inset-2 bg-gradient-to-tr from-violet-500 to-indigo-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
           <img
             src={selectedUser?.profilePic || assets.avatar_icon}
-            className="relative w-28 h-28 rounded-full object-cover border-4 border-white/20 shadow-2xl transition-transform duration-500 group-hover:scale-105"
+            className={`relative w-28 h-28 rounded-full object-cover border-4 ${isOnline ? "border-green-500/50" : "border-white/20"} shadow-2xl transition-transform duration-500 group-hover:scale-105`}
             alt="Profile"
           />
-          <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-400 border-4 border-[#1a1625] rounded-full shadow-[0_0_15px_rgba(74,222,128,0.5)]"></div>
+          {isOnline && (
+            <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-400 border-4 border-[#1a1625] rounded-full shadow-[0_0_15px_rgba(74,222,128,0.5)] z-10"></div>
+          )}
         </div>
         
-        <h2 className="text-xl font-black text-white tracking-tight leading-none mb-4">{selectedUser?.fullName}</h2>
+        <h2 className="text-xl font-black text-white tracking-tight leading-none mb-1">{selectedUser?.fullName}</h2>
+        <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-4 ${isOnline ? "text-green-400" : "text-white/20"}`}>
+          {isOnline ? "Live Now" : "Currently Offline"}
+        </p>
         <p className="text-xs font-medium text-slate-300 leading-relaxed max-w-[240px]">
           {selectedUser?.bio || "Crafting professional connections through seamless communication."}
         </p>

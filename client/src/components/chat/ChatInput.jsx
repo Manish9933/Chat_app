@@ -17,6 +17,12 @@ const LuxuryIcons = {
   ),
   Poll: () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  ),
+  Mic: () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+  ),
+  Waveform: () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
   )
 };
 
@@ -46,7 +52,7 @@ const ChatInput = ({
   }, [setShowEmoji, setShowAttachments]);
 
   return (
-    <div className="p-3 md:p-6 bg-transparent flex flex-col items-center gap-3 w-full max-w-[1200px] mx-auto relative z-50">
+    <div className="p-2 md:p-6 bg-transparent flex flex-col items-center gap-2 md:gap-3 w-full relative z-50">
       
       {/* 🍎 EMOJI PICKER */}
       {showEmoji && (
@@ -88,7 +94,7 @@ const ChatInput = ({
         </div>
       )}
 
-      <div className="flex items-end gap-3 w-full relative z-10">
+      <div className="flex items-end gap-2 md:gap-3 w-full relative z-10 shrink-0">
         <div className="flex-1 min-w-0 flex items-center bg-white/10 border border-white/20 p-1 pl-3 md:p-1.5 md:pl-4 rounded-[28px] focus-within:border-white/40 transition-all shadow-2xl backdrop-blur-3xl relative">
           <button ref={emojiButtonRef} onClick={() => setShowEmoji(!showEmoji)} className={`p-2 transition-transform hover:scale-120 shrink-0 ${showEmoji ? "grayscale-0 scale-110" : "grayscale opacity-80"}`}><span className="text-xl md:text-2xl">😊</span></button>
           <input 
@@ -105,16 +111,20 @@ const ChatInput = ({
           </div>
         </div>
         
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 md:gap-2.5 shrink-0">
            {!text.trim() && !isRecordingAudio && (
-             <button onClick={toggleListening} className={`relative w-13 h-13 md:w-15 md:h-15 flex items-center justify-center shrink-0 rounded-full transition-all duration-500 shadow-2xl ${isListening ? "bg-violet-500 scale-115" : "bg-white/10 border border-white/20 hover:bg-white/20"}`}>
-               <span className={`text-2xl ${isListening ? "animate-pulse text-white" : "text-slate-300"}`}>🎙️</span>
+             <button onClick={toggleListening} className={`relative w-11 h-11 md:w-13 md:h-13 flex items-center justify-center shrink-0 rounded-full transition-all duration-500 shadow-2xl ${isListening ? "bg-violet-500 scale-110 shadow-violet-500/40" : "bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-105"}`}>
+               <div className={`${isListening ? "animate-pulse text-white" : "text-slate-400"}`}>
+                 <LuxuryIcons.Mic />
+               </div>
              </button>
            )}
            {!text.trim() && !isListening && (
-             <button onClick={isRecordingAudio ? stopRecordingAudio : startRecordingAudio} className={`relative w-13 h-13 md:w-15 md:h-15 flex items-center justify-center shrink-0 rounded-full transition-all duration-500 shadow-2xl ${isRecordingAudio ? "bg-red-500 scale-125 shadow-red-500/40" : "bg-white/10 border border-white/20 hover:bg-white/20"}`}>
-               {isRecordingAudio && <div className="absolute inset-0 bg-red-400 rounded-full animate-ping opacity-50"></div>}
-               <span className={`text-2xl ${isRecordingAudio ? "scale-115 text-white" : "text-slate-300"}`}>🎤</span>
+             <button onClick={isRecordingAudio ? stopRecordingAudio : startRecordingAudio} className={`relative w-11 h-11 md:w-13 md:h-13 flex items-center justify-center shrink-0 rounded-full transition-all duration-500 shadow-2xl ${isRecordingAudio ? "bg-red-500 scale-110 shadow-red-500/40" : "bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-105"}`}>
+               {isRecordingAudio && <div className="absolute inset-0 bg-red-400 rounded-full animate-ping opacity-30"></div>}
+               <div className={`${isRecordingAudio ? "scale-110 text-white" : "text-slate-400"}`}>
+                 <LuxuryIcons.Waveform />
+               </div>
              </button>
            )}
            {(text.trim() || isListening || isRecordingAudio) && (

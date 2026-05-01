@@ -21,6 +21,10 @@ const CallUI = () => {
     startRecording,
     stopRecording,
     isRecording,
+    startScreenShare,
+    stopScreenShare,
+    isScreenSharing,
+    switchCamera,
   } = useContext(CallContext);
 
   const { selectedUser } = useContext(ChatContext);
@@ -137,13 +141,34 @@ const CallUI = () => {
             </button>
    
             {callType === "video" && (
-              <button 
-                onClick={toggleCamera}
-                className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${cameraOff ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"}`}
-              >
-                <img src={cameraOff ? assets.cam_off_icon : assets.cam_on_icon} className="w-4 h-4 md:w-5 md:h-5" alt="camera" />
-              </button>
+              <>
+                <button 
+                  onClick={toggleCamera}
+                  className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${cameraOff ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"}`}
+                >
+                  <img src={cameraOff ? assets.cam_off_icon : assets.cam_on_icon} className="w-4 h-4 md:w-5 md:h-5" alt="camera" />
+                </button>
+                {!isScreenSharing && (
+                  <button 
+                    onClick={switchCamera}
+                    className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-400/30 transition-all active:scale-90 shadow-lg group"
+                    title="Switch Camera"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-180 transition-transform duration-500">
+                      <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                  </button>
+                )}
+              </>
             )}
+   
+            <button 
+              onClick={isScreenSharing ? stopScreenShare : startScreenShare}
+              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${isScreenSharing ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"}`}
+              title={isScreenSharing ? "Stop Sharing" : "Share Screen"}
+            >
+              <span className="text-lg">🖥️</span>
+            </button>
    
             <button 
               onClick={toggleSpeaker}

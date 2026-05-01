@@ -58,7 +58,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#030014] text-white flex flex-col items-center overflow-y-auto custom-scrollbar">
+    <div className="h-full w-full bg-[#030014] text-white flex flex-col items-center overflow-y-auto custom-scrollbar">
       
       {/* 🚀 ELITE HEADER */}
       <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between p-6 md:p-10 gap-6 animate-fade-in">

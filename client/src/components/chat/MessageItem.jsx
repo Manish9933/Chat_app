@@ -1,7 +1,7 @@
 import React from "react";
 import { formatMessageTime } from "../../lib/utils";
 
-const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openMenuId, setOpenMenuId }) => {
+const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openMenuId, setOpenMenuId, setReplyingTo }) => {
   let pollData = null;
   if (msg.fileType === "poll") {
     try { pollData = JSON.parse(msg.text); } catch (e) { pollData = null; }
@@ -10,7 +10,7 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
   const repliedMsg = msg.replyTo; // Assume it's populated or we find it in parent
 
   return (
-    <div className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"} animate-fade-in`}>
+    <div id={msg._id} className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"} animate-fade-in`}>
       {!isMe && (
         <img 
           src={selectedUser?.profilePic || "/avatar.png"} 
@@ -31,7 +31,12 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
            </button>
            {openMenuId === msg._id && (
              <div className={`absolute top-11 ${isMe ? "left-0" : "right-0"} w-40 bg-[#1a1625]/95 backdrop-blur-3xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden animate-pop z-50`} onClick={(e) => e.stopPropagation()}>
-               <button className="w-full px-4 py-3.5 text-left text-[10px] font-black text-violet-300 hover:bg-white/10 flex items-center gap-3 tracking-widest">↳ REPLY</button>
+               <button 
+                 onClick={() => { setReplyingTo(msg); setOpenMenuId(null); }} 
+                 className="w-full px-4 py-3.5 text-left text-[10px] font-black text-violet-300 hover:bg-white/10 flex items-center gap-3 tracking-widest"
+               >
+                 ↳ REPLY
+               </button>
                {isMe && (
                  <button 
                    onClick={() => deleteMessage(msg._id)} 
@@ -43,6 +48,7 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
              </div>
            )}
         </div>
+
 
         {/* Media Rendering */}
         {(msg.file || msg.image) && (
@@ -90,15 +96,53 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
           </div>
         )}
 
-        {/* Text Message */}
-        {msg.text && msg.fileType !== "poll" && (
-          <div className={`px-5 py-3 text-[15px] leading-relaxed break-words shadow-2xl transition-all duration-300 ${isMe ? "bg-gradient-to-tr from-violet-500 to-indigo-600 text-white rounded-[26px] rounded-br-[4px] border border-violet-300/30" : "bg-white/15 backdrop-blur-2xl text-white rounded-[26px] rounded-bl-[4px] border border-white/25 shadow-black/50"}`}>
-            {msg.text}
-          </div>
-        )}
+        {/* Integrated Bubble with Reply */}
+        <div className={`relative group max-w-full ${isMe ? "items-end" : "items-start"}`}>
+          <div className={`overflow-hidden shadow-2xl transition-all duration-300 ${isMe ? "bg-gradient-to-tr from-violet-600 to-indigo-700 text-white rounded-[22px] rounded-br-[4px] border border-violet-400/30" : "bg-white/10 backdrop-blur-3xl text-white rounded-[22px] rounded-bl-[4px] border border-white/20 shadow-black/40"}`}>
+            
+            {/* Reply Preview (Internal) */}
+            {msg.replyTo && (
+              <div 
+                className={`mx-2 mt-2 mb-1 p-2.5 rounded-xl flex items-center gap-3 cursor-pointer transition-all hover:bg-white/5 border-l-[3px] border-violet-400 bg-black/20`}
+                onClick={() => {
+                  const element = document.getElementById(msg.replyTo._id);
+                  if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-violet-300 opacity-80 mb-0.5">Original Message</p>
+                  <p className="text-[11px] text-white/70 line-clamp-1 font-medium italic leading-tight">
+                    {msg.replyTo.text || "Shared Media"}
+                  </p>
+                </div>
+              </div>
+            )}
 
-        <div className="flex items-center gap-2 mt-1.5 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Main Text Content */}
+            {msg.text && msg.fileType !== "poll" && (
+              <div className="px-5 py-3.5 text-[15px] leading-relaxed break-words font-medium">
+                {msg.text}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 mt-1.5 px-2 transition-opacity">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{msg.createdAt ? formatMessageTime(msg.createdAt) : "now"}</p>
+          {isMe && (
+            <div className="flex items-center">
+              {msg.seen ? (
+                <svg width="18" height="15" viewBox="0 0 30 24" fill="none" className="text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]">
+                  <path d="M2 12L7 17L18 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M15 17L26 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-white/30">
+                  <path d="M4 12L9 17L20 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
