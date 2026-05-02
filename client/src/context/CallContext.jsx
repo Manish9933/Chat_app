@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { AuthContext } from "./AuthContext";
+import axios from "axios";
 
 export const CallContext = createContext();
 
@@ -14,7 +15,7 @@ const ICE_SERVERS = {
 };
 
 export const CallProvider = ({ children }) => {
-  const { socket } = useContext(AuthContext);
+  const { socket, authUser } = useContext(AuthContext);
 
   // State
   const [incomingCall, setIncomingCall] = useState(null);
@@ -32,6 +33,8 @@ export const CallProvider = ({ children }) => {
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
   const timerRef = useRef(null);
+  const callStartedRef = useRef(false); // Track if the call was actually connected
+  const isCallerRef = useRef(false);    // Track if this user initiated the call
 
   const myVideo = useRef(null);
   const userVideo = useRef(null);
@@ -49,8 +52,27 @@ export const CallProvider = ({ children }) => {
     }, 1000);
   };
 
+  // 🔐 Save encrypted call log to database
+  const saveCallLog = async (status) => {
+    try {
+      if (!receiverId.current || !authUser?._id) return;
+
+      const logData = {
+        callerId: isCallerRef.current ? authUser._id : receiverId.current,
+        receiverId: isCallerRef.current ? receiverId.current : authUser._id,
+        type: callType || "audio",
+        status: status || "ended",
+        duration: callTime,
+      };
+
+      await axios.post("/api/calls/log", logData);
+    } catch (err) {
+      console.error("Failed to save call log:", err);
+    }
+  };
+
   // Cleanup
-  const cleanupCall = () => {
+  const cleanupCall = (skipLog = false) => {
     clearInterval(timerRef.current);
 
     if (recorderRef.current && recorderRef.current.state !== "inactive") {
@@ -72,6 +94,8 @@ export const CallProvider = ({ children }) => {
 
     localStreamRef.current = null;
     receiverId.current = null;
+    callStartedRef.current = false;
+    isCallerRef.current = false;
 
     if (myVideo.current) myVideo.current.srcObject = null;
     if (userVideo.current) userVideo.current.srcObject = null;
@@ -110,6 +134,7 @@ export const CallProvider = ({ children }) => {
   // Start Call (Caller)
   const startCall = async (user, isVideo) => {
     receiverId.current = user._id;
+    isCallerRef.current = true;
     setCallType(isVideo ? "video" : "audio");
     setInCall(true);
 
@@ -182,6 +207,7 @@ export const CallProvider = ({ children }) => {
 
     socket.on("call-answered", async ({ answer }) => {
       await peerRef.current.setRemoteDescription(answer);
+      callStartedRef.current = true;
       startTimer();
     });
 
@@ -189,8 +215,19 @@ export const CallProvider = ({ children }) => {
       if (candidate) await peerRef.current.addIceCandidate(candidate);
     });
 
-    socket.on("end-call", cleanupCall);
-    socket.on("call-rejected", cleanupCall);
+    socket.on("end-call", async () => {
+      // 🔐 Save call log before cleanup (call was connected and ended normally)
+      if (callStartedRef.current) {
+        await saveCallLog("ended");
+      }
+      cleanupCall();
+    });
+
+    socket.on("call-rejected", async () => {
+      // 🔐 Save as missed/rejected call
+      await saveCallLog("missed");
+      cleanupCall();
+    });
 
     return () => {
       socket.off("incoming-call");
@@ -205,6 +242,8 @@ export const CallProvider = ({ children }) => {
   const answerCall = async () => {
     setIncomingCall(null);
     setInCall(true);
+    isCallerRef.current = false;
+    callStartedRef.current = true;
 
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: callType === "video",
@@ -264,7 +303,15 @@ export const CallProvider = ({ children }) => {
   };
 
   // End Call
-  const endCall = () => {
+  const endCall = async () => {
+    // 🔐 Save call log before cleanup
+    if (callStartedRef.current) {
+      await saveCallLog("ended");
+    } else if (isCallerRef.current) {
+      // Caller hung up before the other person answered
+      await saveCallLog("missed");
+    }
+
     if (receiverId.current) {
       socket.emit("end-call", { to: receiverId.current });
     }
@@ -272,7 +319,10 @@ export const CallProvider = ({ children }) => {
   };
 
   // Reject Incoming Call
-  const rejectCall = () => {
+  const rejectCall = async () => {
+    // 🔐 Save as missed call from receiver's perspective
+    await saveCallLog("missed");
+
     if (receiverId.current) {
       socket.emit("reject-call", { to: receiverId.current });
     }

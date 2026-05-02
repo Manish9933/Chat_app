@@ -3,6 +3,26 @@ import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
 import { io, userSocketMap } from "../server.js";
 import mongoose from "mongoose";
+import { encrypt, decrypt } from "../lib/encryption.js";
+
+/**
+ * 🔐 ENCRYPTED FIELD CONSTANTS
+ * These are the Message fields that get encrypted at rest
+ */
+const ENCRYPTED_MSG_FIELDS = ["text"];
+
+/**
+ * Decrypt a single message document for API response
+ */
+const decryptMessage = (msg) => {
+  const obj = msg.toObject ? msg.toObject() : { ...msg };
+  if (obj.text) obj.text = decrypt(obj.text);
+  // Decrypt nested reply data too
+  if (obj.replyTo && obj.replyTo.text) {
+    obj.replyTo.text = decrypt(obj.replyTo.text);
+  }
+  return obj;
+};
 
 /**
  * 🚀 PRODUCTION OPTIMIZED: Get users with unseen counts in ONE query
@@ -45,6 +65,7 @@ export const getUsersForSidebar = async (req, res) => {
 
 /**
  * 🚀 PRODUCTION READY: Fetch chat history with threaded replies
+ * 🔐 All messages are decrypted before sending to client
  */
 export const getMessages = async (req, res) => {
   try {
@@ -66,7 +87,10 @@ export const getMessages = async (req, res) => {
       { seen: true }
     );
 
-    res.json({ success: true, messages: msgs });
+    // 🔐 Decrypt all messages before sending
+    const decryptedMsgs = msgs.map(decryptMessage);
+
+    res.json({ success: true, messages: decryptedMsgs });
   } catch (err) {
     res.status(500).json({ success: false, message: "Failed to load conversation" });
   }
@@ -74,6 +98,7 @@ export const getMessages = async (req, res) => {
 
 /**
  * 🚀 PRODUCTION CLEAN: Optimized sending with media handling
+ * 🔐 Message text is encrypted before storage
  */
 export const sendMessage = async (req, res) => {
   try {
@@ -85,36 +110,45 @@ export const sendMessage = async (req, res) => {
     // Skip upload for text-only message types (location, poll)
     if (file && fileType !== "location" && fileType !== "poll" && fileType !== "text") {
       try {
+        // 🚀 PRO TIP: .webm files (voice notes) often need resource_type: "video" in Cloudinary
+        const resourceType = (fileType === "audio" || fileType === "video") ? "video" : "auto";
+        
         const up = await cloudinary.uploader.upload(file, {
-          resource_type: "auto",
+          resource_type: resourceType,
           folder: "signature_chat_assets"
         });
         fileUrl = up.secure_url;
       } catch (uploadError) {
         console.error("Cloudinary upload error:", uploadError.message);
-        return res.status(500).json({ success: false, message: "Media engine upload failed" });
+        return res.status(500).json({ success: false, message: "Media engine upload failed: " + uploadError.message });
       }
     }
+
+    // 🔐 Encrypt message text before storing in database
+    const encryptedText = text ? encrypt(text) : null;
  
     const msg = await Message.create({
       senderId,
       receiverId,
-      text,
+      text: encryptedText,
       file: fileUrl,
       fileName,
       replyTo,
-      fileType: fileType || (file ? (file.startsWith("data:video") ? "video" : "image") : "text"),
+      fileType: fileType || (file ? (file.startsWith("data:audio") ? "audio" : file.startsWith("data:video") ? "video" : "image") : "text"),
     });
 
     // Populate reply info before emitting to socket
     const populatedMsg = await Message.findById(msg._id).populate("replyTo", "text file fileType");
+
+    // 🔐 Decrypt before sending to clients (they should never see encrypted data)
+    const decryptedMsg = decryptMessage(populatedMsg);
  
     const receiverSocketIds = userSocketMap[receiverId];
     if (receiverSocketIds) {
-      receiverSocketIds.forEach(id => io.to(id).emit("newMessage", populatedMsg));
+      receiverSocketIds.forEach(id => io.to(id).emit("newMessage", decryptedMsg));
     }
  
-    res.status(201).json({ success: true, newMessage: populatedMsg });
+    res.status(201).json({ success: true, newMessage: decryptedMsg });
   } catch (err) {
     res.status(500).json({ success: false, message: "Message delivery failed" });
   }

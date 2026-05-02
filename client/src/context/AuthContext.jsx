@@ -55,10 +55,15 @@ export const AuthProvider = ({ children }) => {
       if (data.success) {
         setAuthUser(data.user);
         socket?.emit("profileUpdate", data.user);
-        toast.success("Profile updated!");
+        return { success: true };
+      } else {
+        toast.error(data.message || "Update failed");
+        return { success: false, message: data.message };
       }
     } catch (err) {
-      toast.error(err.message);
+      const msg = err.response?.data?.message || err.message || "Network error";
+      toast.error(msg);
+      return { success: false, message: msg };
     }
   };
 

@@ -91,9 +91,9 @@ const SettingsPage = () => {
     reader.readAsDataURL(file);
     reader.onload = async () => {
       setIsUploadingImage(true);
-      try { await updateProfile({ profilePic: reader.result }); toast.success("Profile Image Updated"); }
-      catch { toast.error("Image Upload Failed"); }
-      finally { setIsUploadingImage(false); }
+      const res = await updateProfile({ profilePic: reader.result });
+      if (res.success) toast.success("Profile Image Updated");
+      setIsUploadingImage(false);
     };
   };
 
@@ -101,9 +101,9 @@ const SettingsPage = () => {
   const handleSave = async () => {
     if (!fullName.trim()) return toast.error("Name cannot be empty");
     setIsUpdating(true);
-    try { await updateProfile({ fullName, bio }); toast.success("Profile Updated"); }
-    catch { toast.error("Update Failed"); }
-    finally { setIsUpdating(false); }
+    const res = await updateProfile({ fullName, bio });
+    if (res.success) toast.success("Profile Updated");
+    setIsUpdating(false);
   };
 
   // Change Password

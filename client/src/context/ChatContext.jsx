@@ -63,6 +63,7 @@ export const ChatProvider = ({ children }) => {
       const messageData = {
         text: msgBody.text || "",
         file: msgBody.file || null,
+        fileName: msgBody.fileName || null,
         fileType: msgBody.fileType || "text",
         replyTo: msgBody.replyTo || null,
       };

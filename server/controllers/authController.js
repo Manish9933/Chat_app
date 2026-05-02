@@ -73,8 +73,17 @@ export const updateProfile = async (req, res) => {
     if (fullName) updateData.fullName = fullName;
     if (bio !== undefined) updateData.bio = bio; // Allow empty bio string
     if (profilePic) {
-      const uploaded = await cloudinary.uploader.upload(profilePic);
-      updateData.profilePic = uploaded.secure_url;
+      try {
+        const uploaded = await cloudinary.uploader.upload(profilePic, {
+          resource_type: "image",
+          folder: "signature_chat_profiles",
+          transformation: [{ width: 500, height: 500, crop: "fill", quality: "auto" }],
+        });
+        updateData.profilePic = uploaded.secure_url;
+      } catch (uploadErr) {
+        console.error("Profile pic upload error:", uploadErr.message);
+        return res.json({ success: false, message: "Profile image upload failed. Try a smaller image." });
+      }
     }
 
     const updated = await User.findByIdAndUpdate(
@@ -85,6 +94,7 @@ export const updateProfile = async (req, res) => {
 
     res.json({ success: true, user: updated });
   } catch (err) {
+    console.error("Profile update error:", err.message);
     res.json({ success: false, message: err.message });
   }
 };
