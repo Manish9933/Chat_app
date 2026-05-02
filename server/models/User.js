@@ -8,7 +8,15 @@ const userSchema = new mongoose.Schema(
     profilePic: { type: String, default: "" },
     bio: { type: String, default: "" },
 
-    lastSeen: { type: Date, default: Date.now }, // NEW
+    lastSeen: { type: Date, default: Date.now },
+
+    // Privacy Settings
+    privacy: {
+      lastSeenVisible: { type: String, enum: ["everyone", "contacts", "nobody"], default: "everyone" },
+      profilePhotoVisible: { type: String, enum: ["everyone", "contacts", "nobody"], default: "everyone" },
+      readReceipts: { type: Boolean, default: true },
+      onlineStatus: { type: Boolean, default: true },
+    },
   },
   { timestamps: true }
 );

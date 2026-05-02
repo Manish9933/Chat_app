@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
-import { CallContext } from "../../../context/CallContext";
-import { ChatContext } from "../../../context/ChatContext";
+import { CallContext } from "../../context/CallContext";
+import { ChatContext } from "../../context/ChatContext";
 import assets from "../../assets/assets";
 
 const CallUI = () => {
@@ -129,29 +129,39 @@ const CallUI = () => {
           )}
         </div>
    
-        {/* CONTROLS BAR */}
-        <div className="absolute bottom-8 md:bottom-10 z-50 w-full px-4 flex justify-center">
-          <div className="bg-[#1a1a2e]/90 backdrop-blur-3xl border border-white/10 p-2 md:p-3 rounded-full flex items-center gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        {/* CONTROLS BAR — outside overflow-hidden card */}
+        <div className="absolute bottom-8 md:bottom-10 z-[60] w-full px-4 flex justify-center pointer-events-none">
+          <div className="pointer-events-auto bg-[#1a1a2e]/90 backdrop-blur-3xl border border-white/10 p-2 md:p-3 rounded-full flex items-center gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
             
+            {/* Mute */}
             <button 
               onClick={toggleMute}
-              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${isMuted ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"}`}
+              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
+                ${isMuted 
+                  ? "bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110 ring-2 ring-red-400/50" 
+                  : "bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:scale-105"}`}
             >
               <img src={isMuted ? assets.mic_off_icon : assets.mic_on_icon} className="w-4 h-4 md:w-5 md:h-5" alt="mute" />
             </button>
    
             {callType === "video" && (
               <>
+                {/* Camera Toggle */}
                 <button 
                   onClick={toggleCamera}
-                  className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${cameraOff ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"}`}
+                  className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
+                    ${cameraOff 
+                      ? "bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110 ring-2 ring-red-400/50" 
+                      : "bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:scale-105"}`}
                 >
                   <img src={cameraOff ? assets.cam_off_icon : assets.cam_on_icon} className="w-4 h-4 md:w-5 md:h-5" alt="camera" />
                 </button>
+
+                {/* Switch Camera */}
                 {!isScreenSharing && (
                   <button 
                     onClick={switchCamera}
-                    className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-400/30 transition-all active:scale-90 shadow-lg group"
+                    className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-400/30 transition-all duration-300 active:scale-75 hover:scale-105 shadow-lg group"
                     title="Switch Camera"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-180 transition-transform duration-500">
@@ -162,26 +172,35 @@ const CallUI = () => {
               </>
             )}
    
+            {/* Screen Share */}
             <button 
               onClick={isScreenSharing ? stopScreenShare : startScreenShare}
-              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${isScreenSharing ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"}`}
+              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
+                ${isScreenSharing 
+                  ? "bg-blue-500 text-white shadow-lg shadow-blue-500/40 scale-110 ring-2 ring-blue-400/50" 
+                  : "bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:scale-105"}`}
               title={isScreenSharing ? "Stop Sharing" : "Share Screen"}
             >
               <span className="text-lg">🖥️</span>
             </button>
    
+            {/* Speaker */}
             <button 
               onClick={toggleSpeaker}
-              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${!speakerOn ? "bg-white/5 text-white/40 border border-white/10" : "bg-violet-600/40 text-white border border-violet-500/40"}`}
+              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
+                ${speakerOn 
+                  ? "bg-violet-600/40 text-white border border-violet-500/40 shadow-lg shadow-violet-500/20 hover:scale-105" 
+                  : "bg-white/5 text-white/40 border border-white/10 hover:bg-white/15 hover:scale-105"}`}
             >
               <img src={speakerOn ? assets.speaker_on : assets.speaker_off} className="w-4 h-4 md:w-5 md:h-5" alt="speaker" />
             </button>
    
             <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
    
+            {/* End Call */}
             <button 
               onClick={endCall}
-              className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center bg-red-600 hover:bg-red-500 rounded-full transition-all shadow-xl shadow-red-600/30 active:scale-95 group"
+              className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center bg-red-600 hover:bg-red-500 rounded-full transition-all duration-300 shadow-xl shadow-red-600/30 active:scale-75 hover:scale-110 group"
             >
               <img src={assets.end_call} className="w-6 h-6 md:w-7 md:h-7 group-hover:rotate-90 transition-transform duration-500" alt="end" />
             </button>

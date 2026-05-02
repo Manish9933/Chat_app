@@ -98,3 +98,72 @@ export const getUser = async (req, res) => {
     res.json({ success: false, message: err.message });
   }
 };
+
+// CHANGE PASSWORD
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.json({ success: false, message: "Both fields are required" });
+    }
+    if (newPassword.length < 6) {
+      return res.json({ success: false, message: "New password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.json({ success: false, message: "User not found" });
+
+    const valid = await bcrypt.compare(currentPassword, user.password);
+    if (!valid) return res.json({ success: false, message: "Current password is incorrect" });
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    user.password = hash;
+    await user.save();
+
+    res.json({ success: true, message: "Password changed successfully" });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+};
+
+// UPDATE PRIVACY SETTINGS
+export const updatePrivacy = async (req, res) => {
+  try {
+    const { lastSeenVisible, profilePhotoVisible, readReceipts, onlineStatus } = req.body;
+
+    const updateData = {};
+    if (lastSeenVisible !== undefined) updateData["privacy.lastSeenVisible"] = lastSeenVisible;
+    if (profilePhotoVisible !== undefined) updateData["privacy.profilePhotoVisible"] = profilePhotoVisible;
+    if (readReceipts !== undefined) updateData["privacy.readReceipts"] = readReceipts;
+    if (onlineStatus !== undefined) updateData["privacy.onlineStatus"] = onlineStatus;
+
+    const updated = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updateData },
+      { new: true }
+    ).select("-password");
+
+    res.json({ success: true, user: updated });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+};
+
+// DELETE ACCOUNT
+export const deleteAccount = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.json({ success: false, message: "User not found" });
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.json({ success: false, message: "Password is incorrect" });
+
+    await User.findByIdAndDelete(req.user._id);
+    res.json({ success: true, message: "Account deleted permanently" });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+};

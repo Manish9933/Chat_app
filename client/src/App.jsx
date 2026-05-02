@@ -7,7 +7,7 @@ import ProfilePage from "./pages/ProfilePage";
 import UserProfile from './pages/UserProfile.jsx';
 
 import { Toaster } from "react-hot-toast";
-import { AuthContext } from "../context/AuthContext.jsx";
+import { AuthContext } from "./context/AuthContext.jsx";
 
 import CallUI from "./components/call/CallUI";
 import CallPopup from "./components/call/CallPopup";

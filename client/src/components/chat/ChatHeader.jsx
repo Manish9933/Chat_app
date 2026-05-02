@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import assets from "../../assets/assets";
-import { ChatContext } from "../../../context/ChatContext";
-import { AuthContext } from "../../../context/AuthContext";
-import { CallContext } from "../../../context/CallContext";
+import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../context/AuthContext";
+import { CallContext } from "../../context/CallContext";
 
 const LuxuryIcons = {
   Search: () => (

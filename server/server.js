@@ -8,6 +8,7 @@ import { connectDb } from "./lib/db.js";
 
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
+import callRouter from "./routes/callRoutes.js";
 import { Server } from "socket.io";
 import Message from "./models/Message.js";
 
@@ -158,6 +159,7 @@ io.on("connection", (socket) => {
 app.get("/", (req, res) => res.send("🚀 Signature Chat Backend is Running!"));
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
+app.use("/api/calls", callRouter);
 app.get("/api/status", (req, res) => res.send("Server online ✔️"));
 
 // GLOBAL ERROR HANDLER

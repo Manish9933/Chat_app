@@ -107,8 +107,10 @@ export const sendMessage = async (req, res) => {
     // Populate reply info before emitting to socket
     const populatedMsg = await Message.findById(msg._id).populate("replyTo", "text file fileType");
  
-    const receiverSocket = userSocketMap[receiverId];
-    if (receiverSocket) io.to(receiverSocket).emit("newMessage", populatedMsg);
+    const receiverSocketIds = userSocketMap[receiverId];
+    if (receiverSocketIds) {
+      receiverSocketIds.forEach(id => io.to(id).emit("newMessage", populatedMsg));
+    }
  
     res.status(201).json({ success: true, newMessage: populatedMsg });
   } catch (err) {

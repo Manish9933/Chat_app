@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { ChatContext } from "../../../context/ChatContext";
-import { AuthContext } from "../../../context/AuthContext";
+import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../context/AuthContext";
 
 const LuxuryIcons = {
   Gallery: () => (
@@ -52,7 +52,7 @@ const ChatInput = ({
   }, [setShowEmoji, setShowAttachments]);
 
   return (
-    <div className="p-2 md:p-6 bg-transparent flex flex-col items-center gap-2 md:gap-3 w-full relative z-50">
+    <div className="p-2 md:p-6 bg-transparent flex flex-col items-center gap-2 md:gap-3 w-full relative z-40 shrink-0">
       
       {/* 🍎 EMOJI PICKER */}
       {showEmoji && (

@@ -1,8 +1,8 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import assets from "../assets/assets";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
-import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../context/AuthContext";
+import { ChatContext } from "../context/ChatContext";
 
 const Sidebar = () => {
   const {
@@ -64,16 +64,6 @@ const Sidebar = () => {
               <div className="absolute top-full right-0 mt-3 z-[100] w-64 p-3 rounded-[2.5rem] bg-[#1a1625]/95 backdrop-blur-[60px] border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.8)] animate-pop overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-indigo-500/10 pointer-events-none"></div>
                 
-                <button
-                  onClick={() => { setMenuOpen(false); navigate("/profile"); }}
-                  className="relative w-full flex items-center gap-4 px-5 py-4 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white hover:bg-white/10 rounded-[1.8rem] transition-all group"
-                >
-                  <div className="w-10 h-10 rounded-2xl bg-violet-500/20 flex items-center justify-center border border-violet-400/30 group-hover:scale-110 group-hover:rotate-3 transition-all">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400 drop-shadow-[0_0_8px_rgba(167,139,250,0.6)]"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  </div>
-                  My Profile
-                </button>
-
                 <button
                   onClick={() => { setMenuOpen(false); navigate("/settings"); }}
                   className="relative w-full flex items-center gap-4 px-5 py-4 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white hover:bg-white/10 rounded-[1.8rem] transition-all group"
