@@ -271,6 +271,14 @@ export const CallProvider = ({ children }) => {
     cleanupCall();
   };
 
+  // Reject Incoming Call
+  const rejectCall = () => {
+    if (receiverId.current) {
+      socket.emit("reject-call", { to: receiverId.current });
+    }
+    cleanupCall();
+  };
+
   // Controls
   const toggleMute = () => {
     const track = localStreamRef.current?.getAudioTracks()[0];
@@ -393,6 +401,7 @@ export const CallProvider = ({ children }) => {
         startVideoCall,
         answerCall,
         endCall,
+        rejectCall,
 
         toggleMute,
         toggleCamera,
