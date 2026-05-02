@@ -52,6 +52,7 @@ export const ChatProvider = ({ children }) => {
         text: msgBody.text || "",
         file: msgBody.file || null,
         fileType: msgBody.fileType || "text",
+        replyTo: msgBody.replyTo ? { _id: msgBody.replyTo, text: "Replying..." } : null,
         createdAt: new Date().toISOString(),
         isOptimistic: true,
       };
@@ -62,6 +63,7 @@ export const ChatProvider = ({ children }) => {
         text: msgBody.text || "",
         file: msgBody.file || null,
         fileType: msgBody.fileType || "text",
+        replyTo: msgBody.replyTo || null,
       };
 
       const { data } = await axios.post(`/api/messages/send/${selectedUser._id}`, messageData);
@@ -120,7 +122,7 @@ export const ChatProvider = ({ children }) => {
         setMessages((prev) => [...prev, msg]);
         
         // Mark as seen
-        socket.emit("markAsSeen", { senderId: authUser._id, receiverId: senderId });
+        socket.emit("markAsSeen", { senderId: senderId, receiverId: authUser._id });
       } else {
         // Otherwise, add to unseen count
         setUnseenMessages((prev) => ({

@@ -16,7 +16,7 @@ const ChatHeader = ({ isSearching, setIsSearching, searchTerm, setSearchTerm, se
   const { startAudioCall, startVideoCall } = useContext(CallContext);
 
   return (
-    <div className="flex items-center gap-3 py-3 px-4 md:py-4 md:px-6 border-b border-white/10 bg-[#120f26]/80 backdrop-blur-3xl z-40 relative">
+    <div className="flex items-center gap-2 md:gap-3 py-3 px-3 md:py-4 md:px-6 border-b border-white/10 bg-[#120f26]/80 backdrop-blur-3xl z-40 relative w-full overflow-hidden shrink-0">
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-400/40 to-transparent"></div>
       
       <button onClick={() => setSelectedUser(null)} className="flex items-center justify-center w-10 h-10 bg-violet-500/20 hover:bg-violet-500/40 border border-violet-400/30 rounded-full md:hidden active:scale-90 shadow-lg">
@@ -61,7 +61,7 @@ const ChatHeader = ({ isSearching, setIsSearching, searchTerm, setSearchTerm, se
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 md:gap-2.5 shrink-0">
             <button onClick={() => setIsSearching(true)} className="w-10 h-10 flex items-center justify-center hover:bg-white/10 bg-white/5 border border-white/10 rounded-full shadow-2xl group transition-all">
               <LuxuryIcons.Search />
             </button>

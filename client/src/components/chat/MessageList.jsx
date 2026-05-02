@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import MessageItem from "./MessageItem";
 
-const MessageList = ({ messages, authUser, selectedUser, handleVote, deleteMessage, openMenuId, setOpenMenuId, isPopOpen }) => {
+const MessageList = ({ messages, authUser, selectedUser, handleVote, deleteMessage, openMenuId, setOpenMenuId, isPopOpen, setReplyingTo }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -26,6 +26,7 @@ const MessageList = ({ messages, authUser, selectedUser, handleVote, deleteMessa
               deleteMessage={deleteMessage}
               openMenuId={openMenuId}
               setOpenMenuId={setOpenMenuId}
+              setReplyingTo={setReplyingTo}
             />
           );
         })}

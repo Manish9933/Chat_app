@@ -194,7 +194,13 @@ export const CallProvider = ({ children }) => {
     socket.on("end-call", cleanupCall);
     socket.on("call-rejected", cleanupCall);
 
-    return () => socket.removeAllListeners();
+    return () => {
+      socket.off("incoming-call");
+      socket.off("call-answered");
+      socket.off("webrtc-candidate");
+      socket.off("end-call");
+      socket.off("call-rejected");
+    };
   }, [socket]);
 
   // ---------- ANSWER (RECEIVER) ----------
@@ -293,26 +299,15 @@ export const CallProvider = ({ children }) => {
   // ---------- RECORDING ----------
   const startRecording = () => {
     if (!localStreamRef.current) return;
-
     recorderRef.current = new MediaRecorder(localStreamRef.current);
     recordedChunks.current = [];
-
-    recorderRef.current.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.current.push(e.data);
-    };
-
+    recorderRef.current.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.current.push(e.data); };
     recorderRef.current.onstop = () => {
-      const blob = new Blob(recordedChunks.current, {
-        type: "audio/webm",
-      });
+      const blob = new Blob(recordedChunks.current, { type: "audio/webm" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "call-recording.webm";
-      a.click();
+      const a = document.createElement("a"); a.href = url; a.download = "call-recording.webm"; a.click();
       URL.revokeObjectURL(url);
     };
-
     recorderRef.current.start();
     setIsRecording(true);
   };
@@ -321,6 +316,72 @@ export const CallProvider = ({ children }) => {
     if (recorderRef.current) {
       recorderRef.current.stop();
       setIsRecording(false);
+    }
+  };
+
+  // ---------- SCREEN SHARING ----------
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const screenStreamRef = useRef(null);
+
+  const startScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      screenStreamRef.current = stream;
+      const videoTrack = stream.getVideoTracks()[0];
+      if (peerRef.current) {
+        const sender = peerRef.current.getSenders().find((s) => s.track?.kind === "video");
+        if (sender) sender.replaceTrack(videoTrack);
+      }
+      if (myVideo.current) myVideo.current.srcObject = stream;
+      videoTrack.onended = () => stopScreenShare();
+      setIsScreenSharing(true);
+    } catch (err) { console.error("Screen share error:", err); }
+  };
+
+  const stopScreenShare = async () => {
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((t) => t.stop());
+      screenStreamRef.current = null;
+    }
+    const cameraTrack = localStreamRef.current?.getVideoTracks()[0];
+    if (peerRef.current && cameraTrack) {
+      const sender = peerRef.current.getSenders().find((s) => s.track?.kind === "video");
+      if (sender) sender.replaceTrack(cameraTrack);
+    }
+    if (myVideo.current) myVideo.current.srcObject = localStreamRef.current;
+    setIsScreenSharing(false);
+  };
+
+  // ---------- CAMERA SWITCHING (MOBILE) ----------
+  const [facingMode, setFacingMode] = useState("user");
+
+  const switchCamera = async () => {
+    if (!localStreamRef.current || isScreenSharing) return;
+    const newMode = facingMode === "user" ? "environment" : "user";
+
+    try {
+      const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+      if (oldVideoTrack) oldVideoTrack.stop();
+
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: newMode },
+        audio: true,
+      });
+
+      const newVideoTrack = newStream.getVideoTracks()[0];
+
+      if (peerRef.current) {
+        const sender = peerRef.current.getSenders().find((s) => s.track?.kind === "video");
+        if (sender) await sender.replaceTrack(newVideoTrack);
+      }
+
+      // Merge new video track into existing localStreamRef or just replace
+      localStreamRef.current = newStream;
+      if (myVideo.current) myVideo.current.srcObject = newStream;
+
+      setFacingMode(newMode);
+    } catch (err) {
+      console.error("Camera switch error:", err);
     }
   };
 
@@ -340,6 +401,12 @@ export const CallProvider = ({ children }) => {
         toggleMute,
         toggleCamera,
         toggleSpeaker,
+        switchCamera,
+        facingMode,
+
+        startScreenShare,
+        stopScreenShare,
+        isScreenSharing,
 
         startRecording,
         stopRecording,

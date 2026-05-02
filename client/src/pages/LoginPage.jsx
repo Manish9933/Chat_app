@@ -30,8 +30,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center sm:p-6 md:p-10">
-      <div className="w-full h-screen sm:h-auto max-w-5xl grid lg:grid-cols-2 bg-white/5 backdrop-blur-2xl sm:rounded-[3rem] sm:border border-white/10 overflow-hidden shadow-2xl shadow-black/50 animate-pop">
+    <div className="h-full flex items-center justify-center sm:p-6 md:p-10">
+      <div className="w-full h-full sm:h-auto max-w-5xl grid lg:grid-cols-2 bg-white/5 backdrop-blur-2xl sm:rounded-[3rem] sm:border border-white/10 overflow-hidden shadow-2xl shadow-black/50 animate-pop">
         
         {/* Left Side: Branding & Info */}
         <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-r border-white/10">
