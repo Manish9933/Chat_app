@@ -1,5 +1,6 @@
 import React from "react";
 import { formatMessageTime } from "../../lib/utils";
+import assets from "../../assets/assets";
 
 const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openMenuId, setOpenMenuId, setReplyingTo }) => {
   let pollData = null;
@@ -13,7 +14,7 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
     <div id={msg._id} className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"} animate-fade-in`}>
       {!isMe && (
         <img 
-          src={selectedUser?.profilePic || "/avatar.png"} 
+          src={selectedUser?.profilePic || assets.avatar_icon} 
           className="w-8 h-8 rounded-full object-cover border-2 border-white/20 mb-6 shadow-lg" 
           alt="" 
         />
@@ -72,6 +73,31 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
         )}
 
         {/* Poll Rendering */}
+        {msg.fileType === "location" && msg.text && (() => {
+          const parts = msg.text.split("|");
+          const coordText = parts[0]?.replace("📍 ", "");
+          const mapUrl = parts[1] || `https://www.google.com/maps?q=${coordText}`;
+          const [lat, lng] = coordText.split(",").map(s => s.trim());
+          return (
+            <a href={mapUrl} target="_blank" rel="noopener noreferrer"
+              className={`block mb-2 rounded-[24px] overflow-hidden border-2 transition-all shadow-2xl hover:scale-[1.02] cursor-pointer ${isMe ? "border-violet-400/40" : "border-white/20"}`}>
+              <div className="relative w-[280px] h-[160px] bg-[#1a1625]">
+                <img src={`https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=15&size=560x320&markers=${lat},${lng},red-pushpin`}
+                  className="w-full h-full object-cover" alt="map" onError={(e) => { e.target.style.display = 'none'; }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">📍</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/70">Live Location</span>
+                  </div>
+                  <p className="text-xs font-bold text-white/90">{lat}, {lng}</p>
+                </div>
+              </div>
+            </a>
+          );
+        })()}
+
+        {/* Poll Rendering */}
         {pollData && (
           <div className={`p-6 rounded-[2.5rem] border-2 transition-all shadow-2xl min-w-[280px] ${isMe ? "bg-white/15 border-violet-400/40" : "bg-[#1a1625]/80 backdrop-blur-3xl border-white/20 shadow-black/60"}`}>
             <div className="flex items-center gap-3 mb-5">
@@ -119,7 +145,7 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
             )}
 
             {/* Main Text Content */}
-            {msg.text && msg.fileType !== "poll" && (
+            {msg.text && msg.fileType !== "poll" && msg.fileType !== "location" && (
               <div className="px-5 py-3.5 text-[15px] leading-relaxed break-words font-medium">
                 {msg.text}
               </div>

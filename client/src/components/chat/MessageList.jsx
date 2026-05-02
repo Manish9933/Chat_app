@@ -1,15 +1,73 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import MessageItem from "./MessageItem";
 
 const MessageList = ({ messages, authUser, selectedUser, handleVote, deleteMessage, openMenuId, setOpenMenuId, isPopOpen, setReplyingTo }) => {
-  const scrollRef = useRef(null);
+  const containerRef = useRef(null);
+  const prevUserIdRef = useRef(null);
+  const prevMsgCountRef = useRef(0);
 
+  // Scroll to bottom helper — uses the container's own scrollTop, 
+  // NOT scrollIntoView which can cause page-level scroll jumps
+  const scrollToBottom = useCallback((instant = false) => {
+    const el = containerRef.current;
+    if (!el) return;
+    
+    if (instant) {
+      // Instant scroll (chat switch) — no animation, no layout shift
+      el.scrollTop = el.scrollHeight;
+    } else {
+      // Smooth scroll (new message) — animate only within the container
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
+  }, []);
+
+  // Check if user is near the bottom (within 150px)
+  const isNearBottom = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return true;
+    return (el.scrollHeight - el.scrollTop - el.clientHeight) < 150;
+  }, []);
+
+  // CHAT SWITCH: Instantly jump to bottom after messages load
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const currentUserId = selectedUser?._id;
+
+    if (currentUserId !== prevUserIdRef.current) {
+      // Chat changed — wait for DOM to paint new messages, then snap to bottom
+      prevUserIdRef.current = currentUserId;
+      prevMsgCountRef.current = messages.length;
+
+      // Use double-rAF to ensure the browser has fully rendered messages
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollToBottom(true); // instant, no smooth animation
+        });
+      });
+      return;
+    }
+
+    // SAME CHAT: New message arrived
+    if (messages.length > prevMsgCountRef.current) {
+      const wasNearBottom = isNearBottom();
+      prevMsgCountRef.current = messages.length;
+
+      if (wasNearBottom) {
+        // User was reading latest messages — smoothly scroll to new one
+        requestAnimationFrame(() => {
+          scrollToBottom(false);
+        });
+      }
+      // If user scrolled up to read history, don't auto-scroll
+    }
+
+    prevMsgCountRef.current = messages.length;
+  }, [messages, selectedUser?._id, scrollToBottom, isNearBottom]);
 
   return (
-    <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-6 relative transition-all duration-500 ${isPopOpen ? "blur-[2px] opacity-60 scale-[0.98]" : ""}`}>
+    <div 
+      ref={containerRef}
+      className={`flex-1 min-h-0 overflow-y-auto p-4 md:p-6 space-y-6 relative transition-all duration-500 ${isPopOpen ? "blur-[2px] opacity-60 scale-[0.98]" : ""}`}
+    >
       {/* 🌌 Luxury Chat Pattern */}
       <div className="absolute inset-0 bg-whatsapp pointer-events-none opacity-[0.05] invert brightness-200"></div>
       
@@ -30,7 +88,6 @@ const MessageList = ({ messages, authUser, selectedUser, handleVote, deleteMessa
             />
           );
         })}
-        <div ref={scrollRef}></div>
       </div>
     </div>
   );

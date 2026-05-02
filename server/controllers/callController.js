@@ -10,12 +10,16 @@ export const saveCallLog = async (req, res) => {
 };
 
 export const getCallLogs = async (req, res) => {
-  const logs = await CallLog.find({
-    $or: [{ callerId: req.user._id }, { receiverId: req.user._id }],
-  })
-    .populate("callerId", "-password")
-    .populate("receiverId", "-password")
-    .sort({ createdAt: -1 });
+  try {
+    const logs = await CallLog.find({
+      $or: [{ callerId: req.user._id }, { receiverId: req.user._id }],
+    })
+      .populate("callerId", "-password")
+      .populate("receiverId", "-password")
+      .sort({ createdAt: -1 });
 
-  res.json({ success: true, logs });
+    res.json({ success: true, logs });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to fetch call logs" });
+  }
 };

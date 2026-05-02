@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef } from "react";
-import { CallContext } from "../../../context/CallContext";
+import { CallContext } from "../../context/CallContext";
 import assets from "../../assets/assets";
 
 const CallPopup = () => {
