@@ -72,29 +72,37 @@ const MessageItem = ({ msg, isMe, selectedUser, handleVote, deleteMessage, openM
           </div>
         )}
 
-        {/* Poll Rendering */}
+        {/* Location Rendering */}
         {msg.fileType === "location" && msg.text && (() => {
-          const parts = msg.text.split("|");
-          const coordText = parts[0]?.replace("📍 ", "");
-          const mapUrl = parts[1] || `https://www.google.com/maps?q=${coordText}`;
-          const [lat, lng] = coordText.split(",").map(s => s.trim());
-          return (
-            <a href={mapUrl} target="_blank" rel="noopener noreferrer"
-              className={`block mb-2 rounded-[24px] overflow-hidden border-2 transition-all shadow-2xl hover:scale-[1.02] cursor-pointer ${isMe ? "border-violet-400/40" : "border-white/20"}`}>
-              <div className="relative w-[280px] h-[160px] bg-[#1a1625]">
-                <img src={`https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=15&size=560x320&markers=${lat},${lng},red-pushpin`}
-                  className="w-full h-full object-cover" alt="map" onError={(e) => { e.target.style.display = 'none'; }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">📍</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/70">Live Location</span>
+          try {
+            const parts = msg.text.split("|");
+            const coordText = (parts[0] || "").replace("📍 ", "").trim();
+            const coords = coordText.split(",").map(s => s.trim());
+            if (coords.length < 2 || !coords[0] || !coords[1]) return null;
+            const [lat, lng] = coords;
+            const mapUrl = parts[1] || `https://www.google.com/maps?q=${lat},${lng}`;
+            return (
+              <a href={mapUrl} target="_blank" rel="noopener noreferrer"
+                className={`block mb-2 rounded-[24px] overflow-hidden border-2 shadow-2xl cursor-pointer ${isMe ? "border-violet-400/40" : "border-white/20"}`}>
+                <div className="relative w-[260px] md:w-[280px] h-[140px] md:h-[160px] bg-[#1a1625]">
+                  <img 
+                    src={`https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=15&size=560x320&markers=${lat},${lng},red-pushpin`}
+                    className="w-full h-full object-cover" alt="map" 
+                    onError={(e) => { e.target.style.display = 'none'; }} 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">📍</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/70">Location Shared</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-white/90">{lat}, {lng}</p>
+                    <p className="text-[9px] text-white/40 mt-1">Tap to open in Maps</p>
                   </div>
-                  <p className="text-xs font-bold text-white/90">{lat}, {lng}</p>
                 </div>
-              </div>
-            </a>
-          );
+              </a>
+            );
+          } catch { return null; }
         })()}
 
         {/* Poll Rendering */}

@@ -1,7 +1,30 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useCallback } from "react";
 import { CallContext } from "../../context/CallContext";
 import { ChatContext } from "../../context/ChatContext";
 import assets from "../../assets/assets";
+
+// Mobile-friendly button with real tap feedback via state
+const TapButton = ({ onClick, className, children, style }) => {
+  const [pressed, setPressed] = useState(false);
+
+  const handleDown = useCallback(() => setPressed(true), []);
+  const handleUp = useCallback(() => setPressed(false), []);
+
+  return (
+    <button
+      onClick={onClick}
+      onTouchStart={handleDown}
+      onTouchEnd={(e) => { handleUp(); }}
+      onMouseDown={handleDown}
+      onMouseUp={handleUp}
+      onMouseLeave={handleUp}
+      style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent", ...style }}
+      className={`${className} select-none transition-all duration-150 ${pressed ? "scale-90 brightness-75" : "scale-100 brightness-100"}`}
+    >
+      {children}
+    </button>
+  );
+};
 
 const CallUI = () => {
   const {
@@ -129,81 +152,71 @@ const CallUI = () => {
           )}
         </div>
    
-        {/* CONTROLS BAR — outside overflow-hidden card */}
-        <div className="absolute bottom-8 md:bottom-10 z-[60] w-full px-4 flex justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-[#1a1a2e]/90 backdrop-blur-3xl border border-white/10 p-2 md:p-3 rounded-full flex items-center gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        {/* CONTROLS BAR */}
+        <div className="absolute bottom-8 md:bottom-10 z-[60] w-full px-4 flex justify-center" style={{ touchAction: "manipulation" }}>
+          <div className="bg-[#1a1a2e]/90 backdrop-blur-3xl border border-white/10 p-2 md:p-3 rounded-full flex items-center gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
             
             {/* Mute */}
-            <button 
-              onClick={toggleMute}
-              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
-                ${isMuted 
-                  ? "bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110 ring-2 ring-red-400/50" 
-                  : "bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:scale-105"}`}
+            <TapButton 
+              onClick={() => toggleMute()}
+              className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
+                ${isMuted ? "bg-red-500 text-white shadow-lg shadow-red-500/40" : "bg-white/5 text-white border border-white/10"}`}
             >
-              <img src={isMuted ? assets.mic_off_icon : assets.mic_on_icon} className="w-4 h-4 md:w-5 md:h-5" alt="mute" />
-            </button>
+              <img src={isMuted ? assets.mic_off_icon : assets.mic_on_icon} className="w-5 h-5 pointer-events-none" alt="mute" />
+            </TapButton>
    
             {callType === "video" && (
               <>
-                {/* Camera Toggle */}
-                <button 
-                  onClick={toggleCamera}
-                  className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
-                    ${cameraOff 
-                      ? "bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110 ring-2 ring-red-400/50" 
-                      : "bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:scale-105"}`}
+                {/* Camera */}
+                <TapButton 
+                  onClick={() => toggleCamera()}
+                  className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
+                    ${cameraOff ? "bg-red-500 text-white shadow-lg shadow-red-500/40" : "bg-white/5 text-white border border-white/10"}`}
                 >
-                  <img src={cameraOff ? assets.cam_off_icon : assets.cam_on_icon} className="w-4 h-4 md:w-5 md:h-5" alt="camera" />
-                </button>
+                  <img src={cameraOff ? assets.cam_off_icon : assets.cam_on_icon} className="w-5 h-5 pointer-events-none" alt="camera" />
+                </TapButton>
 
                 {/* Switch Camera */}
                 {!isScreenSharing && (
-                  <button 
-                    onClick={switchCamera}
-                    className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-400/30 transition-all duration-300 active:scale-75 hover:scale-105 shadow-lg group"
-                    title="Switch Camera"
+                  <TapButton 
+                    onClick={() => switchCamera()}
+                    className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-180 transition-transform duration-500">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none">
                       <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
                     </svg>
-                  </button>
+                  </TapButton>
                 )}
               </>
             )}
    
-            {/* Screen Share */}
-            <button 
-              onClick={isScreenSharing ? stopScreenShare : startScreenShare}
-              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
-                ${isScreenSharing 
-                  ? "bg-blue-500 text-white shadow-lg shadow-blue-500/40 scale-110 ring-2 ring-blue-400/50" 
-                  : "bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:scale-105"}`}
-              title={isScreenSharing ? "Stop Sharing" : "Share Screen"}
+            {/* Screen Share — Desktop Only (not supported on mobile browsers) */}
+            <TapButton 
+              onClick={() => isScreenSharing ? stopScreenShare() : startScreenShare()}
+              className={`hidden md:flex w-12 h-12 min-w-[44px] min-h-[44px] items-center justify-center rounded-full
+                ${isScreenSharing ? "bg-blue-500 text-white shadow-lg shadow-blue-500/40" : "bg-white/5 text-white border border-white/10"}`}
             >
-              <span className="text-lg">🖥️</span>
-            </button>
+              <span className="text-lg pointer-events-none">🖥️</span>
+            </TapButton>
    
             {/* Speaker */}
-            <button 
-              onClick={toggleSpeaker}
-              className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-all duration-300 active:scale-75 
-                ${speakerOn 
-                  ? "bg-violet-600/40 text-white border border-violet-500/40 shadow-lg shadow-violet-500/20 hover:scale-105" 
-                  : "bg-white/5 text-white/40 border border-white/10 hover:bg-white/15 hover:scale-105"}`}
+            <TapButton 
+              onClick={() => toggleSpeaker()}
+              className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
+                ${speakerOn ? "bg-violet-600/40 text-white border border-violet-500/40" : "bg-white/5 text-white/40 border border-white/10"}`}
             >
-              <img src={speakerOn ? assets.speaker_on : assets.speaker_off} className="w-4 h-4 md:w-5 md:h-5" alt="speaker" />
-            </button>
+              <img src={speakerOn ? assets.speaker_on : assets.speaker_off} className="w-5 h-5 pointer-events-none" alt="speaker" />
+            </TapButton>
    
             <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
    
             {/* End Call */}
-            <button 
-              onClick={endCall}
-              className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center bg-red-600 hover:bg-red-500 rounded-full transition-all duration-300 shadow-xl shadow-red-600/30 active:scale-75 hover:scale-110 group"
+            <TapButton 
+              onClick={() => endCall()}
+              className="w-13 h-13 md:w-14 md:h-14 min-w-[52px] min-h-[52px] flex items-center justify-center bg-red-600 rounded-full shadow-xl shadow-red-600/30"
             >
-              <img src={assets.end_call} className="w-6 h-6 md:w-7 md:h-7 group-hover:rotate-90 transition-transform duration-500" alt="end" />
-            </button>
+              <img src={assets.end_call} className="w-6 h-6 md:w-7 md:h-7 pointer-events-none" alt="end" />
+            </TapButton>
           </div>
         </div>
       </div>

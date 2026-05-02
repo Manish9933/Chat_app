@@ -82,7 +82,8 @@ export const sendMessage = async (req, res) => {
     const { text, file, fileName, fileType, replyTo } = req.body;
  
     let fileUrl = null;
-    if (file) {
+    // Skip upload for text-only message types (location, poll)
+    if (file && fileType !== "location" && fileType !== "poll" && fileType !== "text") {
       try {
         const up = await cloudinary.uploader.upload(file, {
           resource_type: "auto",
@@ -90,6 +91,7 @@ export const sendMessage = async (req, res) => {
         });
         fileUrl = up.secure_url;
       } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError.message);
         return res.status(500).json({ success: false, message: "Media engine upload failed" });
       }
     }
