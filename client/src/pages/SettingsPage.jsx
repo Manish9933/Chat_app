@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import assets from "../assets/assets";
 import toast from "react-hot-toast";
@@ -40,7 +41,7 @@ const NAV_ITEMS = ["Account", "Privacy", "Security", "Visuals", "Storage", "Lega
 const NAV_ICONS = ["👤", "🔒", "🛡️", "🎨", "💾", "📜"];
 
 const SettingsPage = () => {
-  const { authUser, updateProfile, axios, logout } = useContext(AuthContext);
+  const { authUser, updateProfile, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
@@ -113,7 +114,7 @@ const SettingsPage = () => {
     if (newPassword !== confirmPassword) return toast.error("Passwords don't match");
     setIsChangingPassword(true);
     try {
-      const { data } = await axios.put("/api/auth/change-password", { currentPassword, newPassword });
+      const { data } = await api.put("/api/auth/change-password", { currentPassword, newPassword });
       if (data.success) { toast.success(data.message); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); }
       else toast.error(data.message);
     } catch (err) { toast.error(err.message); }
@@ -125,7 +126,7 @@ const SettingsPage = () => {
     const updated = { ...privacy, [key]: value };
     setPrivacy(updated);
     try {
-      const { data } = await axios.put("/api/auth/update-privacy", { [key]: value });
+      const { data } = await api.put("/api/auth/update-privacy", { [key]: value });
       if (!data.success) toast.error("Failed to save");
     } catch { toast.error("Network error"); }
   };
@@ -141,7 +142,7 @@ const SettingsPage = () => {
   const handleDeleteAccount = async () => {
     if (!deletePassword) return toast.error("Enter your password");
     try {
-      const { data } = await axios.delete("/api/auth/delete-account", { data: { password: deletePassword } });
+      const { data } = await api.delete("/api/auth/delete-account", { data: { password: deletePassword } });
       if (data.success) { toast.success("Account deleted"); logout(); navigate("/login"); }
       else toast.error(data.message);
     } catch (err) { toast.error(err.message); }

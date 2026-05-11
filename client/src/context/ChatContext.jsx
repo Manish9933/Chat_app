@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
+import api from "../lib/api";
 import toast from "react-hot-toast";
 
 export const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-  const { socket, axios, authUser } = useContext(AuthContext);
+  const { socket, authUser } = useContext(AuthContext);
 
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -16,7 +17,7 @@ export const ChatProvider = ({ children }) => {
   // Fetch contacts list with unseen counts
   const getUsers = async () => {
     try {
-      const { data } = await axios.get("/api/messages/users");
+      const { data } = await api.get("/api/messages/users");
       if (data.success) {
         setUsers(data.users);
         setUnseenMessages(data.unseenMessages);
@@ -30,7 +31,7 @@ export const ChatProvider = ({ children }) => {
   const getMessages = async (id) => {
     try {
       setMessages([]);
-      const { data } = await axios.get(`/api/messages/${id}`);
+      const { data } = await api.get(`/api/messages/${id}`);
       if (data.success) setMessages(data.messages);
     } catch (err) {
       toast.error(err.message);
@@ -68,7 +69,7 @@ export const ChatProvider = ({ children }) => {
         replyTo: msgBody.replyTo || null,
       };
 
-      const { data } = await axios.post(`/api/messages/send/${selectedUser._id}`, messageData);
+      const { data } = await api.post(`/api/messages/send/${selectedUser._id}`, messageData);
 
       if (data.success) {
         const newMessage = {
@@ -92,7 +93,6 @@ export const ChatProvider = ({ children }) => {
       }
     } catch (err) {
       setMessages((prev) => prev.filter(m => !m._id.toString().startsWith("temp-")));
-      console.error("SendMessage Error:", err);
       toast.error(err.response?.data?.message || err.message || "Failed to send message");
     }
   };
@@ -100,7 +100,7 @@ export const ChatProvider = ({ children }) => {
   // Delete message
   const deleteMessage = async (msgId) => {
     try {
-      const { data } = await axios.delete(`/api/messages/${msgId}`);
+      const { data } = await api.delete(`/api/messages/${msgId}`);
       if (data.success) {
         setMessages((prev) => prev.filter((m) => m._id !== msgId));
         toast.success("Message deleted");

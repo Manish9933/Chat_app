@@ -1,9 +1,10 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
-import { io, userSocketMap } from "../server.js";
+import { io, userSocketMap } from "../lib/socket.js";
 import mongoose from "mongoose";
 import { encrypt, decrypt } from "../lib/encryption.js";
+import { CLOUDINARY_FOLDERS } from "../config/constants.js";
 
 /**
  * 🔐 ENCRYPTED FIELD CONSTANTS
@@ -115,7 +116,7 @@ export const sendMessage = async (req, res) => {
         
         const up = await cloudinary.uploader.upload(file, {
           resource_type: resourceType,
-          folder: "signature_chat_assets"
+          folder: CLOUDINARY_FOLDERS.ASSETS
         });
         fileUrl = up.secure_url;
       } catch (uploadError) {
@@ -172,7 +173,7 @@ export const deleteMessage = async (req, res) => {
     if (msg.file) {
       try {
         const parts = msg.file.split("/");
-        const publicId = `signature_chat_assets/${parts[parts.length - 1].split(".")[0]}`;
+        const publicId = `${CLOUDINARY_FOLDERS.ASSETS}/${parts[parts.length - 1].split(".")[0]}`;
         await cloudinary.uploader.destroy(publicId);
       } catch (cloudErr) {
         // Non-fatal, proceed to DB deletion

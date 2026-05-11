@@ -45,7 +45,7 @@ const CallPopup = () => {
   if (!incomingCall) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex flex-col justify-center items-center text-white">
+    <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex flex-col justify-center items-center text-white pointer-events-auto">
       
       <audio ref={ringtoneRef} src="/ringtone.mp3" loop />
 
@@ -56,7 +56,7 @@ const CallPopup = () => {
       {/* Avatar */}
       <div className="relative z-10 p-1 rounded-full bg-gradient-to-br from-violet-500/30 to-indigo-500/30 border border-white/10 shadow-[0_0_60px_rgba(139,92,246,0.3)] pointer-events-none">
         <img
-          src={incomingCall.profilePic || assets.avatar_icon}
+          src={incomingCall.fromProfilePic || assets.avatar_icon}
           className="w-28 h-28 rounded-full object-cover border-2 border-white/20 shadow-2xl"
           alt=""
         />

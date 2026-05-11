@@ -35,9 +35,9 @@ export const saveCallLog = async (req, res) => {
     });
 
     // Return decrypted version to the client
-    res.json({ success: true, log: decryptCallLog(log) });
+    res.status(201).json({ success: true, log: decryptCallLog(log) });
   } catch (err) {
-    res.json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -56,7 +56,7 @@ export const getCallLogs = async (req, res) => {
     // 🔐 Decrypt all logs before sending to client
     const decryptedLogs = logs.map(decryptCallLog);
 
-    res.json({ success: true, logs: decryptedLogs });
+    res.status(200).json({ success: true, logs: decryptedLogs });
   } catch (err) {
     res.status(500).json({ success: false, message: "Failed to fetch call logs" });
   }

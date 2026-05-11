@@ -2,20 +2,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useContext, useMemo, useState, useEffect } from "react";
 import { ChatContext } from "../context/ChatContext";
 import { AuthContext } from "../context/AuthContext";
+import api from "../lib/api";
 import assets from "../assets/assets";
 
 const UserProfile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { selectedUser, messages, getMessages, setSelectedUser } = useContext(ChatContext);
-  const { axios } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(!selectedUser || selectedUser._id !== userId);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get(`/api/auth/user/${userId}`);
+        const { data } = await api.get(`/api/auth/user/${userId}`);
         if (data.success) {
           setSelectedUser(data.user);
           getMessages(userId);
@@ -32,7 +32,7 @@ const UserProfile = () => {
     } else {
       setLoading(false);
     }
-  }, [userId, axios, setSelectedUser, getMessages]);
+  }, [userId, setSelectedUser, getMessages]);
 
   if (loading) {
     return (

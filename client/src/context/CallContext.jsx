@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { AuthContext } from "./AuthContext";
-import axios from "axios";
+import api from "../lib/api";
 
 export const CallContext = createContext();
 
@@ -22,6 +22,7 @@ export const CallProvider = ({ children }) => {
   const [inCall, setInCall] = useState(false);
   const [callType, setCallType] = useState(null);
   const [callTime, setCallTime] = useState(0);
+  const [remoteUser, setRemoteUser] = useState(null);
 
   const [isMuted, setIsMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
@@ -65,9 +66,9 @@ export const CallProvider = ({ children }) => {
         duration: callTime,
       };
 
-      await axios.post("/api/calls/log", logData);
+      await api.post("/api/calls/log", logData);
     } catch (err) {
-      console.error("Failed to save call log:", err);
+      // Log failure (silent in UI)
     }
   };
 
@@ -110,6 +111,7 @@ export const CallProvider = ({ children }) => {
     setCameraOff(false);
     setSpeakerOn(true);
     setIsRecording(false);
+    setRemoteUser(null);
   };
 
   // Handle tab close
@@ -137,6 +139,7 @@ export const CallProvider = ({ children }) => {
     isCallerRef.current = true;
     setCallType(isVideo ? "video" : "audio");
     setInCall(true);
+    setRemoteUser(user);
 
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: isVideo,
@@ -189,6 +192,8 @@ export const CallProvider = ({ children }) => {
       to: receiverId.current,
       offer,
       type: isVideo ? "video" : "audio",
+      fromName: authUser.fullName,
+      fromProfilePic: authUser.profilePic,
     });
   };
 
@@ -203,6 +208,11 @@ export const CallProvider = ({ children }) => {
       receiverId.current = data.from;
       setIncomingCall(data);
       setCallType(data.type);
+      setRemoteUser({
+        _id: data.from,
+        fullName: data.fromName,
+        profilePic: data.fromProfilePic,
+      });
     });
 
     socket.on("call-answered", async ({ answer }) => {
@@ -304,6 +314,7 @@ export const CallProvider = ({ children }) => {
 
   // End Call
   const endCall = async () => {
+    console.log("Ending call...");
     // 🔐 Save call log before cleanup
     if (callStartedRef.current) {
       await saveCallLog("ended");
@@ -331,24 +342,44 @@ export const CallProvider = ({ children }) => {
 
   // Controls
   const toggleMute = () => {
-    const track = localStreamRef.current?.getAudioTracks()[0];
-    if (!track) return;
-    track.enabled = !track.enabled;
-    setIsMuted(!track.enabled);
+    console.log("Toggling mute...");
+    if (!localStreamRef.current) {
+      console.log("localStreamRef.current is null!");
+      return;
+    }
+    const audioTrack = localStreamRef.current.getAudioTracks()[0];
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      setIsMuted(!audioTrack.enabled);
+      console.log("Mute state:", !audioTrack.enabled);
+    }
   };
 
   const toggleCamera = () => {
-    const track = localStreamRef.current?.getVideoTracks()[0];
-    if (!track) return;
-    track.enabled = !track.enabled;
-    setCameraOff(!track.enabled);
+    console.log("Toggling camera...");
+    if (!localStreamRef.current) {
+      console.log("localStreamRef.current is null!");
+      return;
+    }
+    const videoTrack = localStreamRef.current.getVideoTracks()[0];
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      setCameraOff(!videoTrack.enabled);
+      console.log("Camera off state:", !videoTrack.enabled);
+    }
   };
 
   const toggleSpeaker = () => {
-    if (!remoteAudio.current) return;
-    remoteAudio.current.muted = speakerOn;
-    remoteAudio.current.volume = speakerOn ? 0 : 1;
-    setSpeakerOn(!speakerOn);
+    console.log("Toggling speaker...");
+    if (!remoteAudio.current) {
+      console.log("remoteAudio.current is null!");
+      return;
+    }
+    const isCurrentlyMuted = remoteAudio.current.muted;
+    remoteAudio.current.muted = !isCurrentlyMuted;
+    remoteAudio.current.volume = !isCurrentlyMuted ? 0 : 1;
+    setSpeakerOn(isCurrentlyMuted); // If it was muted, speaker is now ON
+    console.log("Speaker is now:", isCurrentlyMuted ? "ON" : "OFF");
   };
 
   // Recording
@@ -458,6 +489,7 @@ export const CallProvider = ({ children }) => {
         toggleSpeaker,
         switchCamera,
         facingMode,
+        remoteUser,
 
         startScreenShare,
         stopScreenShare,

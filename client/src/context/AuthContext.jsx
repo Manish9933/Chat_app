@@ -1,10 +1,9 @@
 import { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-axios.defaults.baseURL = backendUrl;
 
 export const AuthContext = createContext();
 
@@ -17,41 +16,39 @@ export const AuthProvider = ({ children }) => {
   // Check authentication on load
   const checkAuth = async () => {
     try {
-      const { data } = await axios.get("/api/auth/check");
+      const { data } = await api.get("/api/auth/check");
       if (data.success) {
         setAuthUser(data.user);
         connectSocket(data.user);
       }
     } catch (err) {
-      console.log(err);
+      // User not authenticated or session expired
     }
   };
 
   // Login or Signup
   const login = async (state, body) => {
     try {
-      const { data } = await axios.post(`/api/auth/${state}`, body);
+      const { data } = await api.post(`/api/auth/${state}`, body);
 
       if (!data.success) return toast.error(data.message);
 
       toast.success(data.message);
 
       localStorage.setItem("token", data.token);
-      axios.defaults.headers.common["token"] = data.token;
-
       setToken(data.token);
       setAuthUser(data.userData);
       connectSocket(data.userData);
 
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.response?.data?.message || err.message);
     }
   };
 
   // Update Profile
   const updateProfile = async (body) => {
     try {
-      const { data } = await axios.put("/api/auth/update-profile", body);
+      const { data } = await api.put("/api/auth/update-profile", body);
       if (data.success) {
         setAuthUser(data.user);
         socket?.emit("profileUpdate", data.user);
@@ -100,15 +97,13 @@ export const AuthProvider = ({ children }) => {
   // Initialize on mount
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common["token"] = token;
       checkAuth();
     }
-  }, []);
+  }, [token]);
 
   return (
     <AuthContext.Provider
       value={{
-        axios,
         authUser,
         socket,
         onlineUsers,

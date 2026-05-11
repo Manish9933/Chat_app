@@ -2,9 +2,10 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cloudinary from "../lib/cloudinary.js";
+import { CLOUDINARY_FOLDERS, JWT_EXPIRY } from "../config/constants.js";
 
 const generateToken = (id) =>
-  jwt.sign({ userId: id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  jwt.sign({ userId: id }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRY });
 
 // SIGNUP
 export const signup = async (req, res) => {
@@ -13,7 +14,7 @@ export const signup = async (req, res) => {
 
     const exists = await User.findOne({ email });
     if (exists)
-      return res.json({ success: false, message: "Email already exists" });
+      return res.status(400).json({ success: false, message: "Email already exists" });
 
     const hash = await bcrypt.hash(password, 10);
 
@@ -25,14 +26,14 @@ export const signup = async (req, res) => {
       profilePic: ""
     });
 
-    res.json({
+    res.status(201).json({
       success: true,
       message: "Account created",
       token: generateToken(user._id),
       userData: user
     });
   } catch (err) {
-    res.json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -43,11 +44,11 @@ export const login = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user)
-      return res.json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid)
-      return res.json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
 
     res.json({
       success: true,
@@ -56,13 +57,13 @@ export const login = async (req, res) => {
       userData: user
     });
   } catch (err) {
-    res.json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
 // CHECK AUTH
 export const checkAuth = (req, res) =>
-  res.json({ success: true, user: req.user });
+  res.status(200).json({ success: true, user: req.user });
 
 // UPDATE PROFILE
 export const updateProfile = async (req, res) => {
@@ -71,18 +72,17 @@ export const updateProfile = async (req, res) => {
 
     const updateData = {};
     if (fullName) updateData.fullName = fullName;
-    if (bio !== undefined) updateData.bio = bio; // Allow empty bio string
+    if (bio !== undefined) updateData.bio = bio; 
     if (profilePic) {
       try {
         const uploaded = await cloudinary.uploader.upload(profilePic, {
           resource_type: "image",
-          folder: "signature_chat_profiles",
+          folder: CLOUDINARY_FOLDERS.PROFILES,
           transformation: [{ width: 500, height: 500, crop: "fill", quality: "auto" }],
         });
         updateData.profilePic = uploaded.secure_url;
       } catch (uploadErr) {
-        console.error("Profile pic upload error:", uploadErr.message);
-        return res.json({ success: false, message: "Profile image upload failed. Try a smaller image." });
+        return res.status(500).json({ success: false, message: "Profile image upload failed. Try a smaller image." });
       }
     }
 
@@ -92,12 +92,12 @@ export const updateProfile = async (req, res) => {
       { new: true }
     ).select("-password");
 
-    res.json({ success: true, user: updated });
+    res.status(200).json({ success: true, user: updated });
   } catch (err) {
-    console.error("Profile update error:", err.message);
-    res.json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
+
 // GET USER BY ID
 export const getUser = async (req, res) => {
   try {
