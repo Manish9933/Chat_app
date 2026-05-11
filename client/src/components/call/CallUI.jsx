@@ -3,23 +3,27 @@ import { CallContext } from "../../context/CallContext";
 import { ChatContext } from "../../context/ChatContext";
 import assets from "../../assets/assets";
 
-// Mobile-friendly button with real tap feedback via state
+// Improved TapButton for high responsiveness
 const TapButton = ({ onClick, className, children, style }) => {
   const [pressed, setPressed] = useState(false);
-
-  const handleDown = useCallback(() => setPressed(true), []);
-  const handleUp = useCallback(() => setPressed(false), []);
-
+  
   return (
     <button
-      onClick={onClick}
-      onTouchStart={handleDown}
-      onTouchEnd={(e) => { handleUp(); }}
-      onMouseDown={handleDown}
-      onMouseUp={handleUp}
-      onMouseLeave={handleUp}
-      style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent", ...style }}
-      className={`${className} select-none transition-all duration-150 ${pressed ? "scale-90 brightness-75" : "scale-100 brightness-100"}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (onClick) onClick();
+      }}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)}
+      style={{ 
+        touchAction: "manipulation", 
+        WebkitTapHighlightColor: "transparent", 
+        ...style 
+      }}
+      className={`${className} select-none transition-all duration-150 ${pressed ? "scale-90 brightness-90" : "scale-100"}`}
     >
       {children}
     </button>
@@ -48,6 +52,7 @@ const CallUI = () => {
     stopScreenShare,
     isScreenSharing,
     switchCamera,
+    remoteUser,
   } = useContext(CallContext);
 
   const { selectedUser } = useContext(ChatContext);
@@ -61,11 +66,11 @@ const CallUI = () => {
     )}`;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-0 md:p-6 lg:p-10 font-['Outfit'] overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-0 md:p-6 lg:p-10 font-['Outfit'] overflow-hidden pointer-events-auto">
       {/* Global Background (Matches Home Page) */}
-      <div className="absolute inset-0 bg-mesh opacity-100"></div>
+      <div className="absolute inset-0 bg-mesh opacity-100 pointer-events-none"></div>
       <div className="absolute inset-0 bg-whatsapp opacity-[0.05] pointer-events-none"></div>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm md:backdrop-blur-xl"></div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm md:backdrop-blur-xl pointer-events-none"></div>
       
       <div className="relative w-full h-full max-w-[1200px] max-h-[900px] md:bg-[#0b0a1a]/60 md:backdrop-blur-3xl md:rounded-[3.5rem] md:border md:border-white/10 md:shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col items-center justify-center">
         
@@ -90,7 +95,7 @@ const CallUI = () => {
             <p className="text-[10px] font-mono font-bold text-violet-300">{formatTime(callTime)}</p>
           </div>
           <h3 className="mt-2 text-2xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] animate-pop">
-            {selectedUser?.fullName || "Private Call"}
+            {remoteUser?.fullName || "Private Call"}
           </h3>
         </div>
    
@@ -138,7 +143,7 @@ const CallUI = () => {
               <div className="relative z-10 p-1.5 rounded-full bg-gradient-to-br from-violet-500/20 to-indigo-500/20 backdrop-blur-3xl border border-white/10 shadow-[0_0_60px_rgba(139,92,246,0.25)]">
                 <div className="w-32 h-32 md:w-48 md:h-48 rounded-full border-2 border-white/10 overflow-hidden shadow-2xl">
                   <img
-                    src={selectedUser?.profilePic || assets.avatar_icon}
+                    src={remoteUser?.profilePic || assets.avatar_icon}
                     className="w-full h-full rounded-full object-cover scale-105"
                     alt=""
                   />
@@ -150,74 +155,74 @@ const CallUI = () => {
               </div>
             </div>
           )}
-        </div>
-   
-        {/* CONTROLS BAR */}
-        <div className="absolute bottom-8 md:bottom-10 z-[60] w-full px-4 flex justify-center" style={{ touchAction: "manipulation" }}>
-          <div className="bg-[#1a1a2e]/90 backdrop-blur-3xl border border-white/10 p-2 md:p-3 rounded-full flex items-center gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-            
-            {/* Mute */}
-            <TapButton 
-              onClick={() => toggleMute()}
-              className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
-                ${isMuted ? "bg-red-500 text-white shadow-lg shadow-red-500/40" : "bg-white/5 text-white border border-white/10"}`}
-            >
-              <img src={isMuted ? assets.mic_off_icon : assets.mic_on_icon} className="w-5 h-5 pointer-events-none" alt="mute" />
-            </TapButton>
-   
-            {callType === "video" && (
-              <>
-                {/* Camera */}
-                <TapButton 
-                  onClick={() => toggleCamera()}
-                  className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
-                    ${cameraOff ? "bg-red-500 text-white shadow-lg shadow-red-500/40" : "bg-white/5 text-white border border-white/10"}`}
-                >
-                  <img src={cameraOff ? assets.cam_off_icon : assets.cam_on_icon} className="w-5 h-5 pointer-events-none" alt="camera" />
-                </TapButton>
+                </div>
+      </div>
 
-                {/* Switch Camera */}
-                {!isScreenSharing && (
-                  <TapButton 
-                    onClick={() => switchCamera()}
-                    className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none">
-                      <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                    </svg>
-                  </TapButton>
-                )}
-              </>
-            )}
-   
-            {/* Screen Share — Desktop Only (not supported on mobile browsers) */}
-            <TapButton 
-              onClick={() => isScreenSharing ? stopScreenShare() : startScreenShare()}
-              className={`hidden md:flex w-12 h-12 min-w-[44px] min-h-[44px] items-center justify-center rounded-full
-                ${isScreenSharing ? "bg-blue-500 text-white shadow-lg shadow-blue-500/40" : "bg-white/5 text-white border border-white/10"}`}
-            >
-              <span className="text-lg pointer-events-none">🖥️</span>
-            </TapButton>
-   
-            {/* Speaker */}
-            <TapButton 
-              onClick={() => toggleSpeaker()}
-              className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
-                ${speakerOn ? "bg-violet-600/40 text-white border border-violet-500/40" : "bg-white/5 text-white/40 border border-white/10"}`}
-            >
-              <img src={speakerOn ? assets.speaker_on : assets.speaker_off} className="w-5 h-5 pointer-events-none" alt="speaker" />
-            </TapButton>
-   
-            <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
-   
-            {/* End Call */}
-            <TapButton 
-              onClick={() => endCall()}
-              className="w-13 h-13 md:w-14 md:h-14 min-w-[52px] min-h-[52px] flex items-center justify-center bg-red-600 rounded-full shadow-xl shadow-red-600/30"
-            >
-              <img src={assets.end_call} className="w-6 h-6 md:w-7 md:h-7 pointer-events-none" alt="end" />
-            </TapButton>
-          </div>
+      {/* CONTROLS BAR (Moved outside card to ensure it's never blocked) */}
+      <div className="absolute bottom-10 md:bottom-16 z-[10000] w-full px-2 flex justify-center pointer-events-auto" style={{ touchAction: "manipulation" }}>
+        <div className="bg-[#1a1a2e]/95 backdrop-blur-3xl border border-white/20 p-2 md:p-4 rounded-full flex items-center gap-2 md:gap-5 shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
+          
+          {/* Mute */}
+          <TapButton 
+            onClick={() => toggleMute()}
+            className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
+              ${isMuted ? "bg-red-500 text-white shadow-lg shadow-red-500/40" : "bg-white/5 text-white border border-white/10"}`}
+          >
+            <img src={isMuted ? assets.mic_off_icon : assets.mic_on_icon} className="w-5 h-5 pointer-events-none" alt="mute" />
+          </TapButton>
+  
+          {callType === "video" && (
+            <>
+              {/* Camera */}
+              <TapButton 
+                onClick={() => toggleCamera()}
+                className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
+                  ${cameraOff ? "bg-red-500 text-white shadow-lg shadow-red-500/40" : "bg-white/5 text-white border border-white/10"}`}
+              >
+                <img src={cameraOff ? assets.cam_off_icon : assets.cam_on_icon} className="w-5 h-5 pointer-events-none" alt="camera" />
+              </TapButton>
+
+              {/* Switch Camera */}
+              {!isScreenSharing && (
+                <TapButton 
+                  onClick={() => switchCamera()}
+                  className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none">
+                    <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                  </svg>
+                </TapButton>
+              )}
+            </>
+          )}
+  
+          {/* Screen Share */}
+          <TapButton 
+            onClick={() => isScreenSharing ? stopScreenShare() : startScreenShare()}
+            className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
+              ${isScreenSharing ? "bg-blue-500 text-white shadow-lg shadow-blue-500/40" : "bg-white/5 text-white border border-white/10"}`}
+          >
+            <span className="text-lg pointer-events-none">🖥️</span>
+          </TapButton>
+  
+          {/* Speaker */}
+          <TapButton 
+            onClick={() => toggleSpeaker()}
+            className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
+              ${speakerOn ? "bg-violet-600/40 text-white border border-violet-500/40" : "bg-white/5 text-white/40 border border-white/10"}`}
+          >
+            <img src={speakerOn ? assets.speaker_on : assets.speaker_off} className="w-5 h-5 pointer-events-none" alt="speaker" />
+          </TapButton>
+  
+          <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
+  
+          {/* End Call */}
+          <TapButton 
+            onClick={() => endCall()}
+            className="w-13 h-13 md:w-14 md:h-14 min-w-[52px] min-h-[52px] flex items-center justify-center bg-red-600 rounded-full shadow-xl shadow-red-600/30"
+          >
+            <img src={assets.end_call} className="w-6 h-6 md:w-7 md:h-7 pointer-events-none" alt="end" />
+          </TapButton>
         </div>
       </div>
     </div>

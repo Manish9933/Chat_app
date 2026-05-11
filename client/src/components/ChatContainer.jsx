@@ -99,9 +99,9 @@ const ChatContainer = () => {
   // Empty state
   if (!selectedUser) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 bg-[#030014]/40 backdrop-blur-3xl">
-        <h2 className="text-4xl font-bold text-white mb-4">Signature Messenger</h2>
-        <p className="text-slate-300">Select a contact to begin your conversation.</p>
+      <div className="h-full flex flex-col items-center justify-center p-6 text-center bg-[#030014]/40 backdrop-blur-3xl">
+        <h2 className="text-2xl md:text-4xl font-black text-white mb-3 tracking-tighter uppercase italic opacity-20">Signature</h2>
+        <p className="text-xs md:text-sm text-slate-400 font-medium tracking-wide">Select a contact to begin your conversation</p>
       </div>
     );
   }

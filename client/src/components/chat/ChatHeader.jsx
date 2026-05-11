@@ -16,7 +16,7 @@ const ChatHeader = ({ isSearching, setIsSearching, searchTerm, setSearchTerm, se
   const { startAudioCall, startVideoCall } = useContext(CallContext);
 
   return (
-    <div className="flex items-center gap-2 md:gap-3 py-3 px-3 md:py-4 md:px-6 border-b border-white/10 bg-[#120f26]/80 backdrop-blur-3xl z-40 relative w-full overflow-hidden shrink-0">
+    <div className="flex items-center gap-1.5 md:gap-3 py-2 px-2 md:py-4 md:px-6 border-b border-white/10 bg-[#120f26]/80 backdrop-blur-3xl z-40 relative w-full overflow-hidden shrink-0">
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-400/40 to-transparent"></div>
       
       <button onClick={() => setSelectedUser(null)} className="flex items-center justify-center w-10 h-10 bg-violet-500/20 hover:bg-violet-500/40 border border-violet-400/30 rounded-full md:hidden active:scale-90 shadow-lg">
@@ -43,12 +43,12 @@ const ChatHeader = ({ isSearching, setIsSearching, searchTerm, setSearchTerm, se
           >
             <div className="relative shrink-0">
               <div className="absolute -inset-1 bg-violet-400/30 blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <img src={selectedUser?.profilePic || assets.avatar_icon} className="relative w-11 h-11 rounded-full object-cover border-2 border-white/30 shadow-2xl" alt="" />
+              <img src={selectedUser?.profilePic || assets.avatar_icon} className="relative w-9 h-9 md:w-11 md:h-11 rounded-full object-cover border-2 border-white/30 shadow-2xl" alt="" />
               {onlineUsers?.includes(selectedUser?._id) && <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 border-2 border-[#0b0a1a] rounded-full z-10 shadow-[0_0_10px_rgba(74,222,128,0.5)]"></span>}
             </div>
             
             <div className="flex flex-col justify-center overflow-hidden">
-              <p className="text-lg text-white font-black truncate tracking-tight drop-shadow-md group-hover:text-violet-300 transition-colors">{selectedUser?.fullName || "Chat"}</p>
+              <p className="text-base md:text-lg text-white font-black truncate tracking-tight drop-shadow-md group-hover:text-violet-300 transition-colors">{selectedUser?.fullName || "Chat"}</p>
               <div className="flex items-center gap-2">
                 {typingUsers?.[selectedUser?._id] ? (
                   <span className="text-violet-300 text-[10px] animate-pulse font-black uppercase tracking-widest">typing...</span>
