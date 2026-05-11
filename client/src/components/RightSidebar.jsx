@@ -110,7 +110,7 @@ const RightSidebar = ({ isOpen, onClose, isMobile }) => {
 
         <div className="flex flex-col gap-3 overflow-y-auto max-h-[300px] custom-scrollbar">
           {docFiles.map((msg, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer group">
+            <a key={i} href={msg.file} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer group">
               <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center border border-violet-500/20 transition-all group-hover:scale-110">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               </div>
@@ -118,7 +118,7 @@ const RightSidebar = ({ isOpen, onClose, isMobile }) => {
                 <p className="text-[11px] font-black text-slate-200 truncate group-hover:text-white transition-colors">{msg.fileName || "Unnamed Document"}</p>
                 <p className="text-[9px] font-black uppercase tracking-widest text-white/20 mt-1">Shared Asset</p>
               </div>
-            </div>
+            </a>
           ))}
           {docFiles.length === 0 && <p className="text-[10px] font-bold text-white/10 text-center py-4 uppercase tracking-[0.2em]">No Documents Shared</p>}
         </div>

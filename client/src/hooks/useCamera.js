@@ -55,7 +55,8 @@ const useCamera = (sendMessage) => {
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
 
-    sendMessage({ file: canvas.toDataURL("image/jpeg"), fileType: "image" });
+    // 🚀 PRO TIP: Adding quality (0.7) reduces base64 size significantly for mobile uploads
+    sendMessage({ file: canvas.toDataURL("image/jpeg", 0.7), fileType: "image" });
     closeCamera();
   };
 

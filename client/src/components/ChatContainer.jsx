@@ -15,7 +15,7 @@ import useCamera from "../hooks/useCamera";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 const ChatContainer = () => {
-  const { messages, selectedUser, setSelectedUser, sendMessage, getMessages, deleteMessage, typingUsers } = useContext(ChatContext);
+  const { messages, users, selectedUser, setSelectedUser, sendMessage, getMessages, deleteMessage, typingUsers, votePoll } = useContext(ChatContext);
   const { authUser, onlineUsers } = useContext(AuthContext);
 
   // UI State
@@ -50,13 +50,18 @@ const ChatContainer = () => {
   const handleCreatePoll = () => {
     const filteredOptions = pollOptions.filter(opt => opt.trim() !== "");
     if (!pollQuestion.trim() || filteredOptions.length < 2) return toast.error("Enter a question and 2 options.");
-    const pollData = { question: pollQuestion.trim(), options: filteredOptions.map(opt => ({ text: opt.trim(), votes: 0 })) };
+    const pollData = { 
+      question: pollQuestion.trim(), 
+      options: filteredOptions.map(opt => ({ text: opt.trim(), voters: [] })) 
+    };
     sendMessage({ text: JSON.stringify(pollData), fileType: "poll" });
     setShowPollCreator(false); setPollQuestion(""); setPollOptions(["", ""]);
     toast.success("Poll Launched!");
   };
 
-  const handleVote = (msgId, optionIndex) => { toast.success("Vote Cast!"); };
+  const handleVote = (msgId, optionIndex) => {
+    votePoll(msgId, optionIndex);
+  };
 
   // Message Handlers
   const handleSendMessage = async () => {
@@ -156,6 +161,7 @@ const ChatContainer = () => {
         messages={filteredMessages} 
         authUser={authUser} 
         selectedUser={selectedUser} 
+        users={users}
         handleVote={handleVote} 
         deleteMessage={deleteMessage} 
         openMenuId={openMenuId} 

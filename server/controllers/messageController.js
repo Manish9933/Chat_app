@@ -111,17 +111,34 @@ export const sendMessage = async (req, res) => {
     // Skip upload for text-only message types (location, poll)
     if (file && fileType !== "location" && fileType !== "poll" && fileType !== "text") {
       try {
-        // 🚀 PRO TIP: .webm files (voice notes) often need resource_type: "video" in Cloudinary
-        const resourceType = (fileType === "audio" || fileType === "video") ? "video" : "auto";
+        // 🚀 PRO TIP: Cloudinary needs correct resource_type for different files
+        // "image" for photos, "video" for audio/video (.webm), and "auto" for everything else (PDFs, docs)
+        let resourceType = "auto";
         
+        if (fileType === "image" || file.startsWith("data:image")) {
+          resourceType = "image";
+        } else if (fileType === "audio" || fileType === "video" || file.startsWith("data:audio") || file.startsWith("data:video")) {
+          resourceType = "video";
+        } else {
+          // For documents (PDF, Docx), "auto" is safest as it detects the correct mime type
+          resourceType = "auto";
+        }
+        
+        console.log(`📤 Uploading ${fileType} to Cloudinary (Explicit Type: ${resourceType})...`);
+
         const up = await cloudinary.uploader.upload(file, {
           resource_type: resourceType,
-          folder: CLOUDINARY_FOLDERS.ASSETS
+          folder: CLOUDINARY_FOLDERS.ASSETS,
+          timeout: 60000 // 60s timeout for mobile uploads
         });
         fileUrl = up.secure_url;
       } catch (uploadError) {
-        console.error("Cloudinary upload error:", uploadError.message);
-        return res.status(500).json({ success: false, message: "Media engine upload failed: " + uploadError.message });
+        console.error("❌ Cloudinary upload error:", uploadError.message || uploadError);
+        const errorDetail = uploadError.message || "Unknown Cloudinary Error";
+        return res.status(500).json({ 
+          success: false, 
+          message: `Media engine upload failed: ${errorDetail}` 
+        });
       }
     }
 
@@ -184,5 +201,61 @@ export const deleteMessage = async (req, res) => {
     res.json({ success: true, message: "Trace removed" });
   } catch (err) {
     res.status(500).json({ success: false, message: "System error during deletion" });
+  }
+};
+
+/**
+ * 📊 EXCLUSIVE VOTING: Handle poll votes with user tracking
+ * 🔐 Ensures one user per option with automatic deselection
+ */
+export const votePoll = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { optionIndex } = req.body;
+    const userId = req.user._id.toString();
+
+    const msg = await Message.findById(id);
+    if (!msg || msg.fileType !== "poll") {
+      return res.status(404).json({ success: false, message: "Poll not found" });
+    }
+
+    // 🔐 Decrypt to modify the poll state
+    let pollData;
+    try {
+      pollData = JSON.parse(decrypt(msg.text));
+    } catch (e) {
+      return res.status(500).json({ success: false, message: "Corrupted poll data" });
+    }
+
+    // Standardize structure to use voters array instead of just a count
+    pollData.options = pollData.options.map(opt => ({
+      text: opt.text,
+      voters: opt.voters || []
+    }));
+
+    // 🚫 Radio-button behavior: Remove user from all previous options
+    pollData.options.forEach(opt => {
+      opt.voters = opt.voters.filter(vId => vId !== userId);
+    });
+
+    // ✅ Add user to the newly selected option
+    if (pollData.options[optionIndex]) {
+      pollData.options[optionIndex].voters.push(userId);
+    }
+
+    // 🔐 Re-encrypt the updated poll data for secure storage
+    msg.text = encrypt(JSON.stringify(pollData));
+    await msg.save();
+
+    // 🔐 Prepare decrypted version for real-time broadcast
+    const updatedMsg = decryptMessage(msg);
+
+    // 🔥 Real-time sync across all clients
+    io.emit("messageUpdated", updatedMsg);
+
+    res.json({ success: true, message: updatedMsg });
+  } catch (err) {
+    console.error("Poll vote error:", err);
+    res.status(500).json({ success: false, message: "Voting system failure" });
   }
 };

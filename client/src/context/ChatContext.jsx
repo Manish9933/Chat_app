@@ -112,6 +112,21 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  // Vote on poll
+  const votePoll = async (msgId, optionIndex) => {
+    try {
+      const { data } = await api.post(`/api/messages/vote/${msgId}`, { optionIndex });
+      if (data.success) {
+        setMessages((prev) => 
+          prev.map(m => m._id === msgId ? data.message : m)
+        );
+      }
+    } catch (err) {
+      // Silent error or toast depending on preference
+      console.error("Voting failed", err);
+    }
+  };
+
   // Socket event listeners
   useEffect(() => {
     if (!socket || !authUser) return;
@@ -157,6 +172,12 @@ export const ChatProvider = ({ children }) => {
     socket.on("userStopTyping", ({ userId }) => {
       setTypingUsers((prev) => ({ ...prev, [userId]: false }));
     });
+    
+    socket.on("messageUpdated", (updatedMsg) => {
+      setMessages((prev) => 
+        prev.map(m => m._id === updatedMsg._id ? updatedMsg : m)
+      );
+    });
 
     return () => {
       socket.off("receiveMessage", receiveMessage);
@@ -165,6 +186,7 @@ export const ChatProvider = ({ children }) => {
       socket.off("messagesSeen");
       socket.off("userTyping");
       socket.off("userStopTyping");
+      socket.off("messageUpdated");
     };
   }, [socket, selectedUser, authUser]);
 
@@ -194,6 +216,7 @@ export const ChatProvider = ({ children }) => {
         getMessages,
         sendMessage,
         deleteMessage,
+        votePoll,
         setSelectedUser,
         setUnseenMessages,
         setMessages,

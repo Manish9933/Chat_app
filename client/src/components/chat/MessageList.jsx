@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import MessageItem from "./MessageItem";
 
-const MessageList = ({ messages, authUser, selectedUser, handleVote, deleteMessage, openMenuId, setOpenMenuId, isPopOpen, setReplyingTo }) => {
+const MessageList = ({ messages, authUser, selectedUser, users, handleVote, deleteMessage, openMenuId, setOpenMenuId, isPopOpen, setReplyingTo }) => {
   const containerRef = useRef(null);
   const prevUserIdRef = useRef(null);
   const prevMsgCountRef = useRef(0);
@@ -85,6 +85,8 @@ const MessageList = ({ messages, authUser, selectedUser, handleVote, deleteMessa
               openMenuId={openMenuId}
               setOpenMenuId={setOpenMenuId}
               setReplyingTo={setReplyingTo}
+              authUser={authUser}
+              users={users}
             />
           );
         })}
