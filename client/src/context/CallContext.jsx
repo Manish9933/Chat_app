@@ -7,6 +7,7 @@ import {
 } from "react";
 import { AuthContext } from "./AuthContext";
 import api from "../lib/api";
+import toast from "react-hot-toast";
 
 export const CallContext = createContext();
 
@@ -410,8 +411,16 @@ export const CallProvider = ({ children }) => {
   const screenStreamRef = useRef(null);
 
   const startScreenShare = async () => {
+    if (!navigator.mediaDevices?.getDisplayMedia) {
+      toast.error("Screen sharing is not supported on this device/browser");
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const stream = await navigator.mediaDevices.getDisplayMedia({ 
+        video: true,
+        audio: false 
+      });
       screenStreamRef.current = stream;
       const videoTrack = stream.getVideoTracks()[0];
       if (peerRef.current) {
@@ -421,7 +430,13 @@ export const CallProvider = ({ children }) => {
       if (myVideo.current) myVideo.current.srcObject = stream;
       videoTrack.onended = () => stopScreenShare();
       setIsScreenSharing(true);
-    } catch (err) { console.error("Screen share error:", err); }
+      toast.success("Screen sharing started");
+    } catch (err) { 
+      console.error("Screen share error:", err);
+      if (err.name !== "NotAllowedError") {
+        toast.error("Failed to start screen sharing");
+      }
+    }
   };
 
   const stopScreenShare = async () => {

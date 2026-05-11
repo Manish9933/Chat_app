@@ -196,14 +196,16 @@ const CallUI = () => {
             </>
           )}
   
-          {/* Screen Share */}
-          <TapButton 
-            onClick={() => isScreenSharing ? stopScreenShare() : startScreenShare()}
+          {/* Screen Share - Only show if supported (usually desktop) */}
+          {navigator.mediaDevices?.getDisplayMedia && (
+            <TapButton 
+              onClick={() => isScreenSharing ? stopScreenShare() : startScreenShare()}
             className={`w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full
               ${isScreenSharing ? "bg-blue-500 text-white shadow-lg shadow-blue-500/40" : "bg-white/5 text-white border border-white/10"}`}
           >
             <span className="text-lg pointer-events-none">🖥️</span>
-          </TapButton>
+            </TapButton>
+          )}
   
           {/* Speaker */}
           <TapButton 
